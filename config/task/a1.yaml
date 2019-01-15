@@ -1,0 +1,5 @@
+type: mock
+channel: mock
+cron: "*/2 * * * * ?"
+packet:
+  address: aaa
