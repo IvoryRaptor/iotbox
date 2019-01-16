@@ -1,8 +1,9 @@
 package common
 
 type IModule interface {
-	Config(ch chan ITask, config map[string]interface{}) error
+	Config(config map[string]interface{}) error
 	Send(packet Packet) chan Packet
+	Start(ch chan ITask, this IModule)
 }
 
 type AModule struct {

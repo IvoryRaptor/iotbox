@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func initChannel(k *Kernel) error {
+func initModule(k *Kernel) error {
 	files, _ := ioutil.ReadDir("./config/module")
 	for _, f := range files {
 		name := strings.TrimSuffix(f.Name(), path.Ext(f.Name()))
@@ -24,12 +24,14 @@ func initChannel(k *Kernel) error {
 		if err := yaml.Unmarshal(data, &config); err != nil {
 			return err
 		}
-		c := make(chan common.ITask, 10)
-		if _, err := module.CreateModule(c, config); err != nil {
+		if m, err := module.CreateModule(config); err != nil {
 			return err
+		} else {
+			c := make(chan common.ITask, 10)
+			m.Start(c, m)
+			fmt.Printf("Add Module [%s]\n", name)
+			k.channel[name] = c
 		}
-		fmt.Printf("Add Module [%s]\n", name)
-		k.channel[name] = c
 	}
 	return nil
 }
@@ -63,7 +65,7 @@ func Boot() (*Kernel, error) {
 	result := &Kernel{}
 	result.cron = cron.New()
 	result.channel = map[string]chan common.ITask{}
-	if err := initChannel(result); err != nil {
+	if err := initModule(result); err != nil {
 		return nil, err
 	}
 	if err := initTask(result); err != nil {

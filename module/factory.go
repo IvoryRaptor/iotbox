@@ -8,7 +8,7 @@ import (
 	"github.com/IvoryRaptor/iotbox/module/sqlite"
 )
 
-func CreateModule(ch chan common.ITask, config map[string]interface{}) (common.IModule, error) {
+func CreateModule(config map[string]interface{}) (common.IModule, error) {
 	channelType := config["type"].(string)
 	var result common.IModule
 	switch channelType {
@@ -21,7 +21,7 @@ func CreateModule(ch chan common.ITask, config map[string]interface{}) (common.I
 	if result == nil {
 		return nil, errors.New(fmt.Sprintf("Unknown Module Type [%s]", channelType))
 	}
-	if err := result.Config(ch, config); err != nil {
+	if err := result.Config(config); err != nil {
 		return nil, err
 	}
 	return result, nil

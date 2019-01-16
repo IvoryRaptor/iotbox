@@ -11,8 +11,7 @@ type Mock struct {
 	common.AModule
 }
 
-func (m *Mock) Config(ch chan common.ITask, config map[string]interface{}) error {
-	m.Start(ch, m)
+func (m *Mock) Config(config map[string]interface{}) error {
 	return nil
 }
 
