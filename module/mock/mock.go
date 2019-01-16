@@ -8,17 +8,11 @@ import (
 )
 
 type Mock struct {
-	read chan common.Packet
+	common.AModule
 }
 
 func (m *Mock) Config(ch chan common.ITask, config map[string]interface{}) error {
-	m.read = make(chan common.Packet)
-	go func() {
-		for {
-			task := <-ch
-			task.Work(m)
-		}
-	}()
+	m.Start(ch, m)
 	return nil
 }
 
@@ -29,10 +23,10 @@ func (m *Mock) Send(packet common.Packet) chan common.Packet {
 		go func() {
 			time.Sleep(2 * time.Second)
 			fmt.Printf("[mock] Receive Packet\n")
-			m.read <- common.Packet{
+			m.Response <- common.Packet{
 				"value": rand.Intn(100),
 			}
 		}()
 	}
-	return m.read
+	return m.Response
 }

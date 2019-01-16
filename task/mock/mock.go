@@ -9,12 +9,7 @@ import (
 
 type Mock struct {
 	ahandler.AHandlers
-	channel chan common.ITask
-	packet  common.Packet
-}
-
-func (m *Mock) Run() {
-	m.channel <- m
+	packet common.Packet
 }
 
 func (m *Mock) Work(channel common.IModule) {
@@ -39,7 +34,7 @@ func (m *Mock) Work(channel common.IModule) {
 }
 
 func (m *Mock) Config(kernel common.IKernel, config map[interface{}]interface{}) error {
-	m.channel = kernel.GetModule(config["module"].(string))
+	m.InitTarget(kernel, config, m)
 	m.packet = config["packet"].(map[interface{}]interface{})
 	m.ConfigHandlers(kernel, config["handler"].([]interface{}))
 	return nil

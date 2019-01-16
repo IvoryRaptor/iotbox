@@ -8,6 +8,7 @@ import (
 )
 
 type AHandlers struct {
+	common.ATask
 	handlers []common.IHandlerTask
 }
 
