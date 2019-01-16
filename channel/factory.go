@@ -14,6 +14,8 @@ func CreateChannel(ch chan common.ITask, config map[string]interface{}) (common.
 			return nil, err
 		}
 		return &mock, nil
+	case "sqlite":
+
 	}
 	return nil, nil
 }
