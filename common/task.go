@@ -1,11 +1,15 @@
 package common
 
-import (
-	"github.com/robfig/cron"
-)
+import "github.com/robfig/cron"
 
 type ITask interface {
 	cron.Job
-	Config(kernel IKernel, config map[string]interface{}) error
-	Work(channel IChannel)
+	Config(kernel IKernel, config map[interface{}]interface{}) error
+	Work(channel IModule)
+}
+
+type IHandlerTask interface {
+	ITask
+	Clone() IHandlerTask
+	SetPacket(packet Packet) IHandlerTask
 }

@@ -1,5 +1,9 @@
 type: mock
-channel: mock
+module: mock
 cron: "*/2 * * * * ?"
 packet:
   address: aaa
+handler:
+- type: sql
+  sql: "INSERT INTO DAT_MOCK(VALUE) VALUES({{.value}})"
+  receiver: sqlite

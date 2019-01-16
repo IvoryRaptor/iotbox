@@ -1,4 +1,4 @@
-package mockchannel
+package mock
 
 import (
 	"fmt"
@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type MockChannel struct {
+type Mock struct {
 	read chan common.Packet
 }
 
-func (m *MockChannel) Config(ch chan common.ITask, config map[string]interface{}) error {
+func (m *Mock) Config(ch chan common.ITask, config map[string]interface{}) error {
 	m.read = make(chan common.Packet)
 	go func() {
 		for {
@@ -22,7 +22,7 @@ func (m *MockChannel) Config(ch chan common.ITask, config map[string]interface{}
 	return nil
 }
 
-func (m *MockChannel) Send(packet common.Packet) chan common.Packet {
+func (m *Mock) Send(packet common.Packet) chan common.Packet {
 	fmt.Printf("[mock] Send Packet\n")
 	b := rand.Intn(3)
 	if b > 1 {

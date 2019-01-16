@@ -1,0 +1,5 @@
+type: sqlite
+filename: ./foo.db
+init:
+  - "CREATE TABLE IF NOT EXISTS DAT_MOCK(ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    VALUE INTEGER NOT NULL);"

@@ -16,10 +16,10 @@ func (k *Kernel) Start() {
 	k.cron.Start()
 }
 
-func (k *Kernel) GetChannel(name string) chan common.ITask {
+func (k *Kernel) GetModule(name string) chan common.ITask {
 	return k.channel[name]
 }
 
-func (k *Kernel) JoinTask(spec string, task common.ITask) {
+func (k *Kernel) JoinTask(spec string, task cron.Job) {
 	k.cron.AddJob(spec, task)
 }

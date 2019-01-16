@@ -1,3 +1,0 @@
-channel:
-  - name: sqlite
-    type: sqlite

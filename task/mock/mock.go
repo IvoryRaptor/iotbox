@@ -1,21 +1,23 @@
-package mocktask
+package mock
 
 import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/IvoryRaptor/iotbox/task/ahandler"
 	"time"
 )
 
-type MockTask struct {
+type Mock struct {
+	ahandler.AHandlers
 	channel chan common.ITask
 	packet  common.Packet
 }
 
-func (m *MockTask) Run() {
+func (m *Mock) Run() {
 	m.channel <- m
 }
 
-func (m *MockTask) Work(channel common.IChannel) {
+func (m *Mock) Work(channel common.IModule) {
 	fmt.Printf("[mock] Work\n")
 	var packet common.Packet
 	for i := 0; i < 10 && packet == nil; i++ {
@@ -32,11 +34,13 @@ func (m *MockTask) Work(channel common.IChannel) {
 	}
 	if packet != nil {
 		fmt.Printf("[mock] %d Complete\n", packet["value"])
+		m.WorkHandlers(packet)
 	}
 }
 
-func (m *MockTask) Config(kernel common.IKernel, config map[string]interface{}) error {
-	m.channel = kernel.GetChannel(config["channel"].(string))
+func (m *Mock) Config(kernel common.IKernel, config map[interface{}]interface{}) error {
+	m.channel = kernel.GetModule(config["module"].(string))
 	m.packet = config["packet"].(map[interface{}]interface{})
+	m.ConfigHandlers(kernel, config["handler"].([]interface{}))
 	return nil
 }

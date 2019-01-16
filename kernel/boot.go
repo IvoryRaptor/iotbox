@@ -2,8 +2,8 @@ package kernel
 
 import (
 	"fmt"
-	"github.com/IvoryRaptor/iotbox/channel"
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/IvoryRaptor/iotbox/module"
 	"github.com/IvoryRaptor/iotbox/task"
 	"github.com/robfig/cron"
 	"gopkg.in/yaml.v2"
@@ -12,30 +12,11 @@ import (
 	"strings"
 )
 
-func initConfig(k *Kernel) error {
-	data, err := ioutil.ReadFile("./config/config.yaml")
-	if err != nil {
-		return err
-	}
-	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return err
-	}
-	for _, chanConfig := range config.Channel {
-		c := make(chan common.ITask, 10)
-		if _, err := channel.CreateChannel(c, chanConfig); err != nil {
-			return err
-		}
-		k.channel[chanConfig["name"].(string)] = c
-	}
-	return nil
-}
-
 func initChannel(k *Kernel) error {
-	files, _ := ioutil.ReadDir("./config/channel")
+	files, _ := ioutil.ReadDir("./config/module")
 	for _, f := range files {
 		name := strings.TrimSuffix(f.Name(), path.Ext(f.Name()))
-		data, err := ioutil.ReadFile(fmt.Sprintf("./config/channel/%s", f.Name()))
+		data, err := ioutil.ReadFile(fmt.Sprintf("./config/module/%s", f.Name()))
 		if err != nil {
 			return err
 		}
@@ -44,10 +25,10 @@ func initChannel(k *Kernel) error {
 			return err
 		}
 		c := make(chan common.ITask, 10)
-		if _, err := channel.CreateChannel(c, config); err != nil {
+		if _, err := module.CreateModule(c, config); err != nil {
 			return err
 		}
-		fmt.Printf("Add Channel [%s]\n", name)
+		fmt.Printf("Add Module [%s]\n", name)
 		k.channel[name] = c
 	}
 	return nil
@@ -60,13 +41,16 @@ func initTask(kernel *Kernel) error {
 		if err != nil {
 			return err
 		}
-		var config map[string]interface{}
+		var config map[interface{}]interface{}
 		if err := yaml.Unmarshal(data, &config); err != nil {
 			return err
 		}
-		if err := task.CreateTask(kernel, config); err != nil {
+		var cronTask common.ITask
+		if cronTask, err = task.CreateTask(kernel, config); err != nil {
 			return err
 		}
+		fmt.Printf("Add Corn Task [%s] %s\n", config["type"].(string), config["cron"].(string))
+		kernel.JoinTask(config["cron"].(string), cronTask)
 	}
 	return nil
 }
@@ -79,9 +63,6 @@ func Boot() (*Kernel, error) {
 	result := &Kernel{}
 	result.cron = cron.New()
 	result.channel = map[string]chan common.ITask{}
-	if err := initConfig(result); err != nil {
-		return nil, err
-	}
 	if err := initChannel(result); err != nil {
 		return nil, err
 	}
