@@ -1,7 +1,7 @@
 package common
 
 type IModule interface {
-	Config(config map[string]interface{}) error
+	Config(kernel IKernel, config map[string]interface{}) error
 	Send(packet Packet) chan Packet
 	Start(ch chan ITask, this IModule)
 }

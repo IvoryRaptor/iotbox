@@ -8,19 +8,19 @@ type ITask interface {
 	Work(channel IModule)
 }
 
-type ATask struct {
-	target chan ITask
-	this   ITask
-}
-
-func (s *ATask) InitTarget(kernel IKernel, config map[interface{}]interface{}, this ITask) {
-	s.target = kernel.GetModule(config["target"].(string))
-	s.this = this
-}
-
-func (s *ATask) Run() {
-	s.target <- s.this
-}
+//type ATask struct {
+//	target chan ITask
+//	this   ITask
+//}
+//
+//func (s *ATask) InitTarget(kernel IKernel, config map[interface{}]interface{}, this ITask) {
+//	s.target = kernel.GetModule(config["target"].(string))
+//	s.this = this
+//}
+//
+//func (s *ATask) Run() {
+//	s.target <- s.this
+//}
 
 type IHandlerTask interface {
 	ITask

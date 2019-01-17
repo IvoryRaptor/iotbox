@@ -11,7 +11,7 @@ type Mock struct {
 	common.AModule
 }
 
-func (m *Mock) Config(config map[string]interface{}) error {
+func (m *Mock) Config(_ common.IKernel, config map[string]interface{}) error {
 	return nil
 }
 

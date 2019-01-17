@@ -12,7 +12,7 @@ type Sqlite struct {
 	db *sql.DB
 }
 
-func (m *Sqlite) Config(config map[string]interface{}) error {
+func (m *Sqlite) Config(_ common.IKernel, config map[string]interface{}) error {
 	var err error
 	m.db, err = sql.Open("sqlite3", config["filename"].(string))
 	for _, sqlText := range config["init"].([]interface{}) {

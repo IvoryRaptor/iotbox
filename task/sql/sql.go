@@ -7,15 +7,17 @@ import (
 )
 
 type Sql struct {
-	common.ATask
 	tpl    *template.Template
 	packet common.Packet
+	target string
+	kernel common.IKernel
 }
 
 func (s *Sql) Config(kernel common.IKernel, config map[interface{}]interface{}) error {
 	var err error
 	s.tpl, err = template.New("").Parse(config["sql"].(string))
-	s.InitTarget(kernel, config, s)
+	s.target = config["target"].(string)
+	s.kernel = kernel
 	return err
 }
 
@@ -24,10 +26,15 @@ func (s *Sql) SetPacket(packet common.Packet) common.IHandlerTask {
 	return s
 }
 
+func (s *Sql) Run() {
+	s.kernel.GetModule(s.target) <- s
+}
+
 func (s *Sql) Clone() common.IHandlerTask {
 	return &Sql{
-		ATask: s.ATask,
-		tpl:   s.tpl,
+		tpl:    s.tpl,
+		target: s.target,
+		kernel: s.kernel,
 	}
 }
 
