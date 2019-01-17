@@ -1,10 +1,7 @@
 package ahandler
 
 import (
-	"errors"
-	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/IvoryRaptor/iotbox/task/sql"
 )
 
 type AHandlers struct {
@@ -16,18 +13,11 @@ func (m *AHandlers) ConfigHandlers(kernel common.IKernel, configs []interface{})
 	m.handlers = make([]common.IHandlerTask, len(configs))
 	for i, c := range configs {
 		config := c.(map[interface{}]interface{})
-		handlerType := config["type"].(string)
-		var item common.IHandlerTask
-		switch handlerType {
-		case "sql":
-			item = &sql.Sql{}
+		if item, err := kernel.CreateTask(config); err != nil {
+			return err
+		} else {
+			m.handlers[i] = item.(common.IHandlerTask)
 		}
-		if item == nil {
-			return errors.New(fmt.Sprintf("Unknown Handler Type [%s]", handlerType))
-		}
-		item.Config(kernel, config)
-		fmt.Printf("Add Handler Task %s\n", handlerType)
-		m.handlers[i] = item
 	}
 	return nil
 }

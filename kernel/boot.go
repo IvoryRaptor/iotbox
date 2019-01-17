@@ -3,8 +3,6 @@ package kernel
 import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/IvoryRaptor/iotbox/module"
-	"github.com/IvoryRaptor/iotbox/task"
 	"github.com/robfig/cron"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -24,7 +22,7 @@ func initModule(k *Kernel) error {
 		if err := yaml.Unmarshal(data, &config); err != nil {
 			return err
 		}
-		if m, err := module.CreateModule(config); err != nil {
+		if m, err := k.CreateModule(config); err != nil {
 			return err
 		} else {
 			c := make(chan common.ITask, 10)
@@ -36,7 +34,7 @@ func initModule(k *Kernel) error {
 	return nil
 }
 
-func initTask(kernel *Kernel) error {
+func initTask(k *Kernel) error {
 	files, _ := ioutil.ReadDir("./config/task")
 	for _, f := range files {
 		data, err := ioutil.ReadFile(fmt.Sprintf("./config/task/%s", f.Name()))
@@ -48,11 +46,11 @@ func initTask(kernel *Kernel) error {
 			return err
 		}
 		var cronTask common.ITask
-		if cronTask, err = task.CreateTask(kernel, config); err != nil {
+		if cronTask, err = k.CreateTask(config); err != nil {
 			return err
 		}
 		fmt.Printf("Add Corn Task [%s] %s\n", config["type"].(string), config["cron"].(string))
-		kernel.JoinTask(config["cron"].(string), cronTask)
+		k.JoinTask(config["cron"].(string), cronTask)
 	}
 	return nil
 }

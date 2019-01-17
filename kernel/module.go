@@ -1,4 +1,4 @@
-package module
+package kernel
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/IvoryRaptor/iotbox/module/sqlite"
 )
 
-func CreateModule(config map[string]interface{}) (common.IModule, error) {
+func (k *Kernel) CreateModule(config map[string]interface{}) (common.IModule, error) {
 	channelType := config["type"].(string)
 	var result common.IModule
 	switch channelType {

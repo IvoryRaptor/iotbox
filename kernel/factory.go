@@ -1,4 +1,4 @@
-package task
+package kernel
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/IvoryRaptor/iotbox/task/sql"
 )
 
-func CreateTask(kernel common.IKernel, config map[interface{}]interface{}) (common.ITask, error) {
+func (k *Kernel) CreateTask(config map[interface{}]interface{}) (common.ITask, error) {
 	taskType := config["type"].(string)
 	var result common.ITask
 	switch taskType {
@@ -20,7 +20,7 @@ func CreateTask(kernel common.IKernel, config map[interface{}]interface{}) (comm
 	if result == nil {
 		return nil, errors.New(fmt.Sprintf("Unknown Task Type [%s]", taskType))
 	}
-	if err := result.Config(kernel, config); err != nil {
+	if err := result.Config(k, config); err != nil {
 		return nil, err
 	}
 	return result, nil
