@@ -1,5 +1,5 @@
 type: mock
-target: mock
+target: downsidemock
 cron: "*/2 * * * * ?"
 packet:
   address: aaa
