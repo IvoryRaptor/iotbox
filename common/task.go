@@ -13,3 +13,9 @@ type IHandlerTask interface {
 	Clone() IHandlerTask
 	SetPacket(packet Packet) IHandlerTask
 }
+
+type IOwnerTask interface {
+	ITask
+	GetRequest() Packet
+	SetOwner(owner IModule)
+}

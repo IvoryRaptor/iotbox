@@ -14,7 +14,8 @@ type Upside struct {
 
 func (m *Upside) Config(kernel common.IKernel, config map[string]interface{}) error {
 	m.cron = cron.New()
-	task := &owner.Owner{}
+	var task common.IOwnerTask
+	task = &owner.Owner{}
 	task.Config(
 		kernel,
 		map[interface{}]interface{}{
