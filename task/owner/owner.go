@@ -11,26 +11,26 @@ type State struct {
 
 type Owner struct {
 	common.ATask
-	owner  common.IModule
-	packet common.Packet
-	result common.Packet
+	owner    common.IModule
+	request  common.Packet
+	response common.Packet
 }
 
 func (m *Owner) GetRequest() common.Packet {
-	return m.result
+	return m.response
 }
 
 func (m *Owner) WorkTarget(channel common.IModule) {
 	fmt.Printf("[owner] WorkTarget\n")
-	for i := 0; i < 10 && m.result == nil; i++ {
-		ch := channel.Send(m, m.packet)
+	for i := 0; i < 10 && m.response == nil; i++ {
+		ch := channel.Send(m, m.request)
 		select {
 		case res := <-ch:
-			m.result = res
+			m.response = res
 		case <-time.After(time.Second * 3):
 			fmt.Println("Timeout!")
 		}
-		if m.result != nil {
+		if m.response != nil {
 			break
 		}
 	}
@@ -40,7 +40,7 @@ func (m *Owner) WorkTarget(channel common.IModule) {
 
 func (m *Owner) WorkOwner(channel common.IModule) {
 	fmt.Printf("[owner] WorkOwner\n")
-	channel.Send(m, m.result)
+	channel.Send(m, m.response)
 }
 
 func (m *Owner) SetOwner(owner common.IModule) *Owner {
@@ -49,7 +49,7 @@ func (m *Owner) SetOwner(owner common.IModule) *Owner {
 }
 
 func (m *Owner) OwnerConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
-	m.packet = config["packet"].(map[interface{}]interface{})
+	m.request = config["request"].(map[interface{}]interface{})
 	return nil
 }
 
