@@ -43,7 +43,7 @@ func (s *Sql) Work(channel common.IModule) {
 	if err := s.tpl.Execute(buf, s.packet); err != nil {
 		return
 	}
-	ch := channel.Send(common.Packet{
+	ch := channel.Send(s, common.Packet{
 		"sql": buf.String(),
 	})
 	<-ch

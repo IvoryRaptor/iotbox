@@ -18,7 +18,7 @@ func (m *Mock) Work(channel common.IModule) {
 	fmt.Printf("[mock] Work\n")
 	var packet common.Packet
 	for i := 0; i < 10 && packet == nil; i++ {
-		ch := channel.Send(m.packet)
+		ch := channel.Send(m, m.packet)
 		select {
 		case res := <-ch:
 			packet = res

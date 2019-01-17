@@ -15,7 +15,7 @@ func (m *Mock) Config(_ common.IKernel, config map[string]interface{}) error {
 	return nil
 }
 
-func (m *Mock) Send(packet common.Packet) chan common.Packet {
+func (m *Mock) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	fmt.Printf("[downsidemock] Send Packet\n")
 	b := rand.Intn(3)
 	if b > 1 {

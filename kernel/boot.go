@@ -25,10 +25,9 @@ func initModule(k *Kernel) error {
 			if m, err := k.CreateModule(config); err != nil {
 				return err
 			} else {
-				c := make(chan common.ITask, 10)
-				m.Start(c, m)
+				m.Start(m)
 				fmt.Printf("Add Module [%s]\n", name)
-				k.channel[name] = c
+				k.channel[name] = m.GetTaskQueue()
 			}
 		}
 	}

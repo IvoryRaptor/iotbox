@@ -23,7 +23,7 @@ func (m *Sqlite) Config(_ common.IKernel, config map[string]interface{}) error {
 	return err
 }
 
-func (m *Sqlite) Send(packet common.Packet) chan common.Packet {
+func (m *Sqlite) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	go func() {
 		fmt.Printf("SQLITE EXEC [%s]\n", packet["sql"])
 		if result, err := m.db.Exec(packet["sql"].(string)); err != nil {
