@@ -10,11 +10,9 @@ type State struct {
 }
 
 type Owner struct {
-	target string
-	kernel common.IKernel
-	packet common.Packet
-	work   func(channel common.IModule)
+	common.ATask
 	owner  common.IModule
+	packet common.Packet
 	result common.Packet
 }
 
@@ -36,31 +34,27 @@ func (m *Owner) WorkTarget(channel common.IModule) {
 			break
 		}
 	}
-	m.work = m.WorkOwner
+	m.SetCurrentWork(m.WorkOwner)
 	m.owner.GetTaskQueue() <- m
 }
 
 func (m *Owner) WorkOwner(channel common.IModule) {
 	fmt.Printf("[owner] WorkOwner\n")
-	<-channel.Send(m, m.result)
+	channel.Send(m, m.result)
 }
 
-func (m *Owner) Run() {
-	m.kernel.GetModule(m.target) <- m
-}
-
-func (m *Owner) Work(channel common.IModule) {
-	m.work(channel)
-}
-
-func (m *Owner) SetOwner(owner common.IModule) {
+func (m *Owner) SetOwner(owner common.IModule) *Owner {
 	m.owner = owner
+	return m
 }
 
-func (m *Owner) Config(kernel common.IKernel, config map[interface{}]interface{}) error {
-	m.kernel = kernel
-	m.target = config["target"].(string)
+func (m *Owner) OwnerConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
 	m.packet = config["packet"].(map[interface{}]interface{})
-	m.work = m.WorkTarget
 	return nil
+}
+
+func Create() *Owner {
+	result := &Owner{}
+	result.SetCurrentWork(result.WorkTarget).SetOtherConfig(result.OtherConfig)
+	return result
 }

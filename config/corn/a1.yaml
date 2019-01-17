@@ -1,6 +1,6 @@
 type: mock
 target: downsidemock
-cron: "*/10 * * * * ?"
+cron: "*/5 * * * * ?"
 packet:
   address: aaa
 handler:

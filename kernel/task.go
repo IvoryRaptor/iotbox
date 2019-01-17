@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/task/mock"
+	"github.com/IvoryRaptor/iotbox/task/owner"
 	"github.com/IvoryRaptor/iotbox/task/sql"
 )
 
@@ -13,9 +14,11 @@ func (k *Kernel) CreateTask(config map[interface{}]interface{}) (common.ITask, e
 	var result common.ITask
 	switch taskType {
 	case "mock":
-		result = &mock.Mock{}
+		result = mock.Create()
 	case "sql":
-		result = &sql.Sql{}
+		result = sql.Create()
+	case "":
+		result = &owner.Owner{}
 	}
 	if result == nil {
 		return nil, errors.New(fmt.Sprintf("Unknown Task Type [%s]", taskType))

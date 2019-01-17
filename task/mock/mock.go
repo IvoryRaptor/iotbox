@@ -3,18 +3,15 @@ package mock
 import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/IvoryRaptor/iotbox/task/ahandler"
 	"time"
 )
 
 type Mock struct {
-	ahandler.AHandlers
+	common.AHandlers
 	packet common.Packet
-	target string
-	kernel common.IKernel
 }
 
-func (m *Mock) Work(channel common.IModule) {
+func (m *Mock) MockWork(channel common.IModule) {
 	fmt.Printf("[mock] Work\n")
 	var packet common.Packet
 	for i := 0; i < 10 && packet == nil; i++ {
@@ -34,13 +31,15 @@ func (m *Mock) Work(channel common.IModule) {
 		m.WorkHandlers(packet)
 	}
 }
-func (m *Mock) Run() {
-	m.kernel.GetModule(m.target) <- m
-}
-func (m *Mock) Config(kernel common.IKernel, config map[interface{}]interface{}) error {
-	m.kernel = kernel
-	m.target = config["target"].(string)
+
+func (m *Mock) MockConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
 	m.packet = config["packet"].(map[interface{}]interface{})
 	m.ConfigHandlers(kernel, config["handler"].([]interface{}))
 	return nil
+}
+
+func Create() *Mock {
+	result := &Mock{}
+	result.SetCurrentWork(result.MockWork).SetOtherConfig(result.MockConfig)
+	return result
 }

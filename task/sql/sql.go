@@ -7,18 +7,9 @@ import (
 )
 
 type Sql struct {
+	common.ATask
 	tpl    *template.Template
 	packet common.Packet
-	target string
-	kernel common.IKernel
-}
-
-func (s *Sql) Config(kernel common.IKernel, config map[interface{}]interface{}) error {
-	var err error
-	s.tpl, err = template.New("").Parse(config["sql"].(string))
-	s.target = config["target"].(string)
-	s.kernel = kernel
-	return err
 }
 
 func (s *Sql) SetPacket(packet common.Packet) common.IHandlerTask {
@@ -26,19 +17,21 @@ func (s *Sql) SetPacket(packet common.Packet) common.IHandlerTask {
 	return s
 }
 
-func (s *Sql) Run() {
-	s.kernel.GetModule(s.target) <- s
-}
-
 func (s *Sql) Clone() common.IHandlerTask {
-	return &Sql{
-		tpl:    s.tpl,
-		target: s.target,
-		kernel: s.kernel,
+	result := &Sql{
+		tpl:   s.tpl,
+		ATask: s.ATask,
 	}
+	return InitSql(result)
 }
 
-func (s *Sql) Work(channel common.IModule) {
+func (s *Sql) SqlConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
+	var err error
+	s.tpl, err = template.New("").Parse(config["sql"].(string))
+	return err
+}
+
+func (s *Sql) SqlWork(channel common.IModule) {
 	buf := new(bytes.Buffer)
 	if err := s.tpl.Execute(buf, s.packet); err != nil {
 		return
@@ -47,4 +40,14 @@ func (s *Sql) Work(channel common.IModule) {
 		"sql": buf.String(),
 	})
 	<-ch
+}
+
+func InitSql(sql *Sql) *Sql {
+	sql.SetCurrentWork(sql.SqlWork).SetOtherConfig(sql.SqlConfig)
+	return sql
+}
+
+func Create() *Sql {
+	result := &Sql{}
+	return InitSql(result)
 }
