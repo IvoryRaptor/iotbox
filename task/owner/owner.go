@@ -51,6 +51,6 @@ func (m *Owner) OwnerConfig(kernel common.IKernel, config map[interface{}]interf
 
 func Create() *Owner {
 	result := &Owner{}
-	result.SetOtherConfig(result.OtherConfig)
+	result.SetOtherConfig(result.OwnerConfig)
 	return result
 }

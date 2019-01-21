@@ -9,6 +9,8 @@ import (
 
 type Mock struct {
 	common.AModule
+	failureRate int
+	wait        time.Duration
 }
 
 func (m *Mock) GetName() string {
@@ -16,15 +18,17 @@ func (m *Mock) GetName() string {
 }
 
 func (m *Mock) Config(_ common.IKernel, config map[string]interface{}) error {
+	m.failureRate = config["failure"].(int) - 1
+	m.wait = time.Duration(config["wait"].(int)) * time.Second
 	return nil
 }
 
 func (m *Mock) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	fmt.Printf("[downsidemock] Send Packet %s\n", packet["address"])
-	b := rand.Intn(3)
-	if b > 1 {
+	b := rand.Intn(100)
+	if b > m.failureRate {
 		go func() {
-			time.Sleep(2 * time.Second)
+			time.Sleep(m.wait)
 			fmt.Printf("[downsidemock] Receive Packet\n")
 			m.Response <- common.Packet{
 				"value": rand.Intn(100),
