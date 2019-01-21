@@ -31,15 +31,16 @@ func (s *Sql) SqlConfig(kernel common.IKernel, config map[interface{}]interface{
 	return err
 }
 
-func (s *Sql) SqlWork(channel common.IModule) {
+func (s *Sql) SqlWork(channel common.IModule) (common.WorkState, error) {
 	buf := new(bytes.Buffer)
 	if err := s.tpl.Execute(buf, s.packet); err != nil {
-		return
+		return common.Failed, err
 	}
 	ch := channel.Send(s, common.Packet{
 		"sql": buf.String(),
 	})
 	<-ch
+	return common.Complete, nil
 }
 
 func InitSql(sql *Sql) *Sql {

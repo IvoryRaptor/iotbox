@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/IvoryRaptor/iotbox/task/mock"
+	"github.com/IvoryRaptor/iotbox/task/demo"
 	"github.com/IvoryRaptor/iotbox/task/owner"
 	"github.com/IvoryRaptor/iotbox/task/sql"
 )
@@ -14,10 +14,10 @@ func (k *Kernel) CreateTask(config map[interface{}]interface{}) (common.ITask, e
 	var result common.ITask
 	switch taskType {
 	case "mock":
-		result = mock.Create()
+		result = demo.Create()
 	case "sql":
 		result = sql.Create()
-	case "":
+	case "owner":
 		result = &owner.Owner{}
 	}
 	if result == nil {

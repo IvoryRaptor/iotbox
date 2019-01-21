@@ -20,7 +20,7 @@ func (m *Owner) GetRequest() common.Packet {
 	return m.response
 }
 
-func (m *Owner) WorkTarget(channel common.IModule) {
+func (m *Owner) WorkTarget(channel common.IModule) (common.WorkState, error) {
 	fmt.Printf("[owner] WorkTarget\n")
 	for i := 0; i < 10 && m.response == nil; i++ {
 		ch := channel.Send(m, m.request)
@@ -36,11 +36,13 @@ func (m *Owner) WorkTarget(channel common.IModule) {
 	}
 	m.SetCurrentWork(m.WorkOwner)
 	m.owner.GetTaskQueue() <- m
+	return common.Complete, nil
 }
 
-func (m *Owner) WorkOwner(channel common.IModule) {
+func (m *Owner) WorkOwner(channel common.IModule) (common.WorkState, error) {
 	fmt.Printf("[owner] WorkOwner\n")
 	channel.Send(m, m.response)
+	return common.Complete, nil
 }
 
 func (m *Owner) SetOwner(owner common.IModule) *Owner {

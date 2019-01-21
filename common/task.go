@@ -1,13 +1,22 @@
 package common
 
 import (
+	"errors"
 	"github.com/robfig/cron"
+)
+
+type WorkState int
+
+const (
+	Running WorkState = iota
+	Complete
+	Failed
 )
 
 type ITask interface {
 	cron.Job
 	Config(kernel IKernel, config map[interface{}]interface{}) error
-	Work(channel IModule)
+	Work(channel IModule) (WorkState, error)
 }
 
 type IHandlerTask interface {
@@ -25,14 +34,15 @@ type IOwnerTask interface {
 type ATask struct {
 	target      string
 	kernel      IKernel
-	CurrentWork func(channel IModule)
+	CurrentWork func(channel IModule) (WorkState, error)
 	OtherConfig func(kernel IKernel, config map[interface{}]interface{}) error
 }
 
-func (t *ATask) Work(channel IModule) {
+func (t *ATask) Work(channel IModule) (WorkState, error) {
 	if t.CurrentWork != nil {
-		t.CurrentWork(channel)
+		return t.CurrentWork(channel)
 	}
+	return Failed, errors.New("CurrentWork is nil")
 }
 
 func (t *ATask) Run() {
@@ -48,7 +58,7 @@ func (t *ATask) Config(kernel IKernel, config map[interface{}]interface{}) error
 	return nil
 }
 
-func (t *ATask) SetCurrentWork(work func(channel IModule)) *ATask {
+func (t *ATask) SetCurrentWork(work func(channel IModule) (WorkState, error)) *ATask {
 	t.CurrentWork = work
 	return t
 }
