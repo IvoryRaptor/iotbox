@@ -1,6 +1,7 @@
 package demo
 
 import (
+	"errors"
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	"time"
@@ -11,25 +12,22 @@ type Demo struct {
 	packet common.Packet
 }
 
-func (d *Demo) DemoWork(channel common.IModule) (common.WorkState, error) {
+func (d *Demo) DemoWork(module common.IModule) (common.WorkState, error) {
 	fmt.Printf("[demo] Work\n")
 	var packet common.Packet
 	for i := 0; i < 10 && packet == nil; i++ {
-		ch := channel.Send(d, d.packet)
-		select {
-		case res := <-ch:
-			packet = res
-		case <-time.After(time.Second * 3):
+		ch := module.Send(d, d.packet)
+		if packet = module.Read(ch, time.Second*3); packet != nil {
+			break
+		} else {
 			fmt.Println("Timeout!")
 		}
-		if packet != nil {
-			break
-		}
 	}
-	if packet != nil {
-		fmt.Printf("[demo] %d Complete\n", packet["value"])
-		d.WorkHandlers(packet)
+	if packet == nil {
+		return common.Failed, errors.New("")
 	}
+	fmt.Printf("[demo] %d Complete\n", packet["value"])
+	d.WorkHandlers(packet)
 	return common.Complete, nil
 }
 

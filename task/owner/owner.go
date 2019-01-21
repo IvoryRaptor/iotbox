@@ -20,19 +20,14 @@ func (m *Owner) GetRequest() common.Packet {
 	return m.response
 }
 
-func (m *Owner) WorkTarget(channel common.IModule) (common.WorkState, error) {
+func (m *Owner) WorkTarget(module common.IModule) (common.WorkState, error) {
 	fmt.Printf("[owner] WorkTarget\n")
 	for i := 0; i < 10 && m.response == nil; i++ {
-		ch := channel.Send(m, m.request)
-		select {
-		case res := <-ch:
-			m.response = res
-		case <-time.After(time.Second * 3):
-			fmt.Println("Timeout!")
-		}
-		if m.response != nil {
+		ch := module.Send(m, m.request)
+		if m.response = module.Read(ch, time.Second*3); m.response != nil {
 			break
 		}
+		fmt.Println("Timeout!")
 	}
 	m.SetCurrentWork(m.WorkOwner)
 	m.owner.GetTaskQueue() <- m

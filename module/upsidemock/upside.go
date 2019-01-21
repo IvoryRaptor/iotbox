@@ -35,3 +35,7 @@ func (m *Upside) Send(task common.ITask, packet common.Packet) chan common.Packe
 	fmt.Printf("Owner Complete Value = %d\n", packet["value"])
 	return m.Response
 }
+
+func Create() *Upside {
+	return &Upside{}
+}

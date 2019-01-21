@@ -43,3 +43,7 @@ func (m *Corn) Config(kernel common.IKernel, config map[string]interface{}) erro
 func (m *Corn) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	return m.Response
 }
+
+func Create() *Corn {
+	return &Corn{}
+}

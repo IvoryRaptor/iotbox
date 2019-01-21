@@ -29,3 +29,7 @@ func (m *Mock) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	}
 	return m.Response
 }
+
+func Create() *Mock {
+	return &Mock{}
+}

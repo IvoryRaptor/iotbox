@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/IvoryRaptor/iotbox/common"
 	"text/template"
+	"time"
 )
 
 type Sql struct {
@@ -31,15 +32,16 @@ func (s *Sql) SqlConfig(kernel common.IKernel, config map[interface{}]interface{
 	return err
 }
 
-func (s *Sql) SqlWork(channel common.IModule) (common.WorkState, error) {
+func (s *Sql) SqlWork(module common.IModule) (common.WorkState, error) {
 	buf := new(bytes.Buffer)
 	if err := s.tpl.Execute(buf, s.packet); err != nil {
 		return common.Failed, err
 	}
-	ch := channel.Send(s, common.Packet{
+	ch := module.Send(s, common.Packet{
 		"sql": buf.String(),
 	})
-	<-ch
+	//消费掉回应消息
+	module.Read(ch, time.Second*3)
 	return common.Complete, nil
 }
 
