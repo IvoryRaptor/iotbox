@@ -38,6 +38,6 @@ func (m *Mock) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	return m.Response
 }
 
-func Create() *Mock {
+func CreateMock() *Mock {
 	return &Mock{}
 }

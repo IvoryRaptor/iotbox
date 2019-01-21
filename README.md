@@ -22,7 +22,17 @@ Send 表示Task发送数据包给模块，并期待模块的返回
 
 ### 2.2 开发Task
 
-Task必须继承自ATask，并实现ITask的Config、Work两个函数
+Task必须继承自ATask，由于go语言没有构造函数，因此必须定义CreateXXX函数(该函数为动态加载做准备)
+该函数必须设置该对象的SetOtherConfig函数。
+<code>
+func (d *Demo) XXXConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
+</code>
+
+Task为状态机模式，需要配置当前执行的Work函数
+
+<code>
+func XXXWork(module common.IModule) (common.WorkState, error) 
+</code>
 
 Config 为通过配置文件初始化Task
 
@@ -32,7 +42,7 @@ Work 为执行任务，表示Task已经获得Module的调度权
 
 ### 3.1 定时任务
 
->> 本例子用于模仿定时执行的多帧任务，由模块core启动该任务，任务执行后，将结果发送给handler配置的
+本例子用于模仿定时执行的多帧任务，由模块core启动该任务，任务执行后，将结果发送给handler配置的
 处理事件(Sqlite及上报)。
 
 >> 注意：由于每次调用任务对象为固定对象，因此需考虑避免并发问题（如被某个模块调用时，不可被其他模块所调用）
@@ -47,3 +57,4 @@ Work 为执行任务，表示Task已经获得Module的调度权
 
 /task/sql/sql.go            将结果转换为SQL语句，并发送给Sqlite执行
 
+### 3.2 

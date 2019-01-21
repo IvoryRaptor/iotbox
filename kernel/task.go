@@ -15,11 +15,11 @@ func (k *Kernel) CreateTask(config map[interface{}]interface{}) (common.ITask, e
 	var result common.ITask
 	switch taskType {
 	case "mock":
-		result = demo.Create()
+		result = demo.CreateDemo()
 	case "sql":
-		result = sql.Create()
+		result = sql.CreateSql()
 	case "report":
-		result = report.Create()
+		result = report.CreateReport()
 	case "owner":
 		result = &owner.Owner{}
 	}

@@ -48,6 +48,6 @@ func (m *Corn) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	return m.Response
 }
 
-func Create() *Corn {
+func CreateCore() *Corn {
 	return &Corn{}
 }

@@ -15,13 +15,13 @@ func (k *Kernel) CreateModule(config map[string]interface{}) (common.IModule, er
 	var result common.IModule
 	switch channelType {
 	case "downsidemock":
-		result = downsidemock.Create()
+		result = downsidemock.CreateMock()
 	case "sqlite":
-		result = sqlite.Create()
+		result = sqlite.CreateSqlite()
 	case "corn":
-		result = corn.Create()
+		result = corn.CreateCore()
 	case "upsidemock":
-		result = upsidemock.Create()
+		result = upsidemock.CreateUpside()
 	}
 	if result == nil {
 		return nil, errors.New(fmt.Sprintf("Unknown Module Type [%s]", channelType))

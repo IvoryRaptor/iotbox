@@ -49,7 +49,7 @@ func (m *Owner) OwnerConfig(kernel common.IKernel, config map[interface{}]interf
 	return nil
 }
 
-func Create() *Owner {
+func CreateOwner() *Owner {
 	result := &Owner{}
 	result.SetOtherConfig(result.OwnerConfig)
 	return result

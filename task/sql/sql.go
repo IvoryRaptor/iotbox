@@ -47,7 +47,7 @@ func (s *Sql) SqlWork(module common.IModule) (common.WorkState, error) {
 	return common.Complete, nil
 }
 
-func Create() *Sql {
+func CreateSql() *Sql {
 	result := &Sql{}
 	result.SetOtherConfig(result.SqlConfig)
 	return result

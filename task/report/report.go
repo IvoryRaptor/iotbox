@@ -35,7 +35,7 @@ func (d *Report) StartWork(module common.IModule) (common.WorkState, error) {
 	return common.Complete, nil
 }
 
-func Create() *Report {
+func CreateReport() *Report {
 	result := &Report{}
 	result.SetOtherConfig(result.ReportConfig)
 	return result

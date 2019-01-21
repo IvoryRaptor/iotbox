@@ -43,6 +43,6 @@ func (m *Sqlite) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	return m.Response
 }
 
-func Create() *Sqlite {
+func CreateSqlite() *Sqlite {
 	return &Sqlite{}
 }

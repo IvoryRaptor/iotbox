@@ -19,7 +19,7 @@ func (m *Upside) Config(kernel common.IKernel, config map[string]interface{}) er
 	go func() {
 		for {
 			time.Sleep(5 * time.Second)
-			task := owner.Create()
+			task := owner.CreateOwner()
 			task.Config(
 				kernel,
 				map[interface{}]interface{}{
@@ -40,6 +40,6 @@ func (m *Upside) Send(task common.ITask, packet common.Packet) chan common.Packe
 	return m.Response
 }
 
-func Create() *Upside {
+func CreateUpside() *Upside {
 	return &Upside{}
 }

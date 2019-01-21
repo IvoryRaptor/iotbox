@@ -49,7 +49,7 @@ func (d *Demo) DemoConfig(kernel common.IKernel, config map[interface{}]interfac
 	return nil
 }
 
-func Create() *Demo {
+func CreateDemo() *Demo {
 	result := &Demo{}
 	result.SetOtherConfig(result.DemoConfig)
 	return result
