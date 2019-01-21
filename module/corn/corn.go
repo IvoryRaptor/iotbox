@@ -14,6 +14,10 @@ type Corn struct {
 	cron *cron.Cron
 }
 
+func (m *Corn) GetName() string {
+	return "core"
+}
+
 func (m *Corn) Config(kernel common.IKernel, config map[string]interface{}) error {
 	m.cron = cron.New()
 	tasksPath := config["tasks"].(string)

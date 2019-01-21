@@ -6,6 +6,7 @@ import (
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/task/demo"
 	"github.com/IvoryRaptor/iotbox/task/owner"
+	"github.com/IvoryRaptor/iotbox/task/report"
 	"github.com/IvoryRaptor/iotbox/task/sql"
 )
 
@@ -17,6 +18,8 @@ func (k *Kernel) CreateTask(config map[interface{}]interface{}) (common.ITask, e
 		result = demo.Create()
 	case "sql":
 		result = sql.Create()
+	case "report":
+		result = report.Create()
 	case "owner":
 		result = &owner.Owner{}
 	}

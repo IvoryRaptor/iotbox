@@ -9,48 +9,46 @@ import (
 
 type Sql struct {
 	common.ATask
-	tpl    *template.Template
-	packet common.Packet
+	tpl        *template.Template
+	sqlCommand string
 }
 
-func (s *Sql) SetPacket(packet common.Packet) common.IHandlerTask {
-	s.packet = packet
-	return s
+func (s *Sql) SetPacket(packet common.Packet) (common.ICloneTask, error) {
+	buf := new(bytes.Buffer)
+	var err error
+	if err = s.tpl.Execute(buf, packet); err == nil {
+		s.sqlCommand = buf.String()
+	}
+	return s, err
 }
 
-func (s *Sql) Clone() common.IHandlerTask {
+func (s *Sql) Clone() common.ICloneTask {
 	result := &Sql{
 		tpl:   s.tpl,
 		ATask: s.ATask,
 	}
-	return InitSql(result)
+	result.SetCurrentWork(result.SqlWork)
+	return result
 }
 
 func (s *Sql) SqlConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
 	var err error
+	s.SetCurrentWork(s.SqlWork)
 	s.tpl, err = template.New("").Parse(config["sql"].(string))
 	return err
 }
 
 func (s *Sql) SqlWork(module common.IModule) (common.WorkState, error) {
-	buf := new(bytes.Buffer)
-	if err := s.tpl.Execute(buf, s.packet); err != nil {
-		return common.Failed, err
-	}
 	ch := module.Send(s, common.Packet{
-		"sql": buf.String(),
+		"sql": s.sqlCommand,
 	})
 	//消费掉回应消息
 	module.Read(ch, time.Second*3)
 	return common.Complete, nil
 }
 
-func InitSql(sql *Sql) *Sql {
-	sql.SetCurrentWork(sql.SqlWork).SetOtherConfig(sql.SqlConfig)
-	return sql
-}
-
 func Create() *Sql {
 	result := &Sql{}
-	return InitSql(result)
+	result.SetOtherConfig(result.SqlConfig)
+	return result
 }

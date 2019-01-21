@@ -1,9 +1,14 @@
 type: mock
 target: downsidemock
 cron: "*/5 * * * * ?"
+retry: 3
 packet:
-  address: aaa
+- address: aaa
+- address: bbb
+- address: ccc
 handler:
 - type: sql
   sql: "INSERT INTO DAT_MOCK(VALUE) VALUES({{.value}})"
   target: sqlite
+- type: report
+  target: upsidemock

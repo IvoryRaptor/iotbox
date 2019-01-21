@@ -6,6 +6,7 @@ import (
 )
 
 type IModule interface {
+	GetName() string
 	Config(kernel IKernel, config map[string]interface{}) error
 	Send(handle ITask, packet Packet) chan Packet
 	Start(this IModule)

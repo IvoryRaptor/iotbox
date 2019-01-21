@@ -28,6 +28,22 @@ Config 为通过配置文件初始化Task
 
 Work 为执行任务，表示Task已经获得Module的调度权
 
+## 3、Example说明
 
+### 3.1 定时任务
 
+>> 本例子用于模仿定时执行的多帧任务，由模块core启动该任务，任务执行后，将结果发送给handler配置的
+处理事件(Sqlite及上报)。
+
+>> 注意：由于每次调用任务对象为固定对象，因此需考虑避免并发问题（如被某个模块调用时，不可被其他模块所调用）
+
+#### 3.1.1 涉及代码
+
+/module/core/core.go        定时启动的任务组
+
+/module/sqlite/sqlite.go    Sqlite执行任务
+
+/task/demo/demo.go          Demo多帧任务
+
+/task/sql/sql.go            将结果转换为SQL语句，并发送给Sqlite执行
 

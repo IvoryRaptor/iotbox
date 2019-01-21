@@ -2,6 +2,7 @@ package common
 
 import (
 	"errors"
+	"fmt"
 	"github.com/robfig/cron"
 )
 
@@ -19,10 +20,10 @@ type ITask interface {
 	Work(channel IModule) (WorkState, error)
 }
 
-type IHandlerTask interface {
+type ICloneTask interface {
 	ITask
-	Clone() IHandlerTask
-	SetPacket(packet Packet) IHandlerTask
+	Clone() ICloneTask
+	SetPacket(packet Packet) (ICloneTask, error)
 }
 
 type IOwnerTask interface {
@@ -32,21 +33,37 @@ type IOwnerTask interface {
 }
 
 type ATask struct {
-	target      string
-	kernel      IKernel
-	CurrentWork func(channel IModule) (WorkState, error)
-	OtherConfig func(kernel IKernel, config map[interface{}]interface{}) error
+	target        string
+	kernel        IKernel
+	CurrentModule IModule
+	CurrentWork   func(channel IModule) (WorkState, error)
+	OtherConfig   func(kernel IKernel, config map[interface{}]interface{}) error
 }
 
-func (t *ATask) Work(channel IModule) (WorkState, error) {
-	if t.CurrentWork != nil {
-		return t.CurrentWork(channel)
+func (t *ATask) Work(module IModule) (WorkState, error) {
+	if t.CurrentModule != nil && t.CurrentModule == module {
+		return Failed, errors.New(fmt.Sprintf("module [%s] will call task,but module [%s] is calling", module.GetName(), t.CurrentModule.GetName()))
 	}
-	return Failed, errors.New("CurrentWork is nil")
+	if t.CurrentWork == nil {
+		return Failed, errors.New("CurrentWork is nil")
+	}
+	state, err := t.CurrentWork(module)
+	switch state {
+	case Complete:
+		t.CurrentModule = nil
+	case Failed:
+		t.CurrentModule = nil
+	}
+	return state, err
 }
 
 func (t *ATask) Run() {
-	t.kernel.GetModule(t.target) <- t
+	t.JoinQueue(t.target)
+}
+
+func (t *ATask) JoinQueue(module string) *ATask {
+	t.kernel.GetModule(module) <- t
+	return t
 }
 
 func (t *ATask) Config(kernel IKernel, config map[interface{}]interface{}) error {

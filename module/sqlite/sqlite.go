@@ -12,6 +12,10 @@ type Sqlite struct {
 	db *sql.DB
 }
 
+func (m *Sqlite) GetName() string {
+	return "sqlite"
+}
+
 func (m *Sqlite) Config(_ common.IKernel, config map[string]interface{}) error {
 	var err error
 	m.db, err = sql.Open("sqlite3", config["filename"].(string))
