@@ -1,0 +1,6 @@
+type: modbus
+wait: 2
+frame: rtu
+port: /dev/tty.usbserial
+portConfig: 115200,8,n,1
+address: 1

@@ -1,0 +1,9 @@
+type: QA
+target: modbus
+cron: "*/10 * * * * ?"
+retry: 3
+packet:
+- address: aaa
+handler:
+- type: report
+  target: upsidemock
