@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	"log"
-	"math"
 	"time"
 )
 
@@ -58,31 +57,16 @@ func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err 
 	itemData := data[9:]
 	log.Printf("[%s]===> Decode data %v\n", mp.GetName(), itemData)
 	switch mp.valueType {
-	case "bool":
-		if itemData[0] == 0 {
-			item.RawValue = false
-		} else {
-			item.RawValue = true
+	case "int", "float":
+		// 可以对字节任意排序
+		if len(itemData) < 4 {
+			itemData = append(make([]byte, 4 - len(itemData)), itemData...)
 		}
-		item.ConversionValue = item.RawValue
-	case "int":
-		switch len(itemData) {
-		case 1:
-			item.RawValue = itemData[0]
-		case 2:
-			item.RawValue = binary.BigEndian.Uint16(itemData)
-		case 4:
-			item.RawValue = binary.BigEndian.Uint32(itemData)
-		}
-		item.ConversionValue = item.RawValue
-	case "float":
-		item.RawValue = math.Float32frombits(binary.BigEndian.Uint32(itemData))
-	case "string":
-		item.RawValue = string(itemData)
-		item.ConversionValue = item.RawValue
-	default:
-		log.Fatalf("[%s]===> Decode valueType error[%s]\n", mp.GetName(), mp.valueType)
 	}
+	if err:=item.ByteToValue(itemData) ; err !=nil {
+		log.Fatalf("[%s]===> Decode ByteToValue %s\n", mp.GetName(), err)
+	}
+	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
 	res = append(res, item)
 	return res, nil
 }

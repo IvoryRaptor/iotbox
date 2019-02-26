@@ -1,6 +1,9 @@
 package common
 
 import (
+	"encoding/binary"
+	"fmt"
+	"math"
 	"time"
 )
 
@@ -30,7 +33,29 @@ type ADataItem struct {
 	SampleStatus int
 }
 
-// ToValue 转换值
-func (item *ADataItem) ToValue([]byte) error {
+// ToValue []byte转换标准value
+func (item *ADataItem) ByteToValue(data []byte) error {
+	switch item.ValueType {
+	case "bool":
+		if data[0] == 0 {
+			item.RawValue = false
+		} else {
+			item.RawValue = true
+		}
+	case "int":
+		item.RawValue = binary.BigEndian.Uint32(data)
+	case "string":
+		item.RawValue = string(data)
+	case "float":
+		item.RawValue = math.Float32frombits(binary.BigEndian.Uint32(data))
+	default:
+		return fmt.Errorf("ByteToValue unknow type")
+	}
+	item.ConversionValue = item.RawValue
+	return nil
+}
+
+// StringToValue 字符串转标准value
+func (item *ADataItem) StringToValue(data string) error {
 	return nil
 }
