@@ -25,7 +25,7 @@ type ADataItem struct {
 	// 转换后值,只有int float 支持转换
 	ConversionValue interface{}
 	// 采样时间
-	AampleTime time.Time
+	SampleTime time.Time
 	// 采样状态
 	SampleStatus int
 }

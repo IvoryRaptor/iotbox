@@ -48,7 +48,7 @@ func (mp *NetModbusProtocol) Encode(config map[interface{}]interface{}) (data []
 // Decode 解包
 func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err error) {
 	res := make([]common.ADataItem, 0)
-	item := common.ADataItem{Name: mp.Name, ValueType: mp.valueType, AampleTime: time.Now()}
+	item := common.ADataItem{Name: mp.Name, ValueType: mp.valueType, SampleTime: time.Now()}
 	// 5个0 5byte
 	// 长度 1byte
 	// 站地址 1byte
