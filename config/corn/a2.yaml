@@ -6,8 +6,8 @@ packet:
 -
   transactionID: 0
   slaveID: 1
-  address: 1
-  len: 1
+  address: 10001
+  len: 2
   isWrite: false
   itemType: bool
 handler:

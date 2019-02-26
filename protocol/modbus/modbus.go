@@ -47,7 +47,7 @@ func (mp *Protocol) Config(config map[interface{}]interface{}) (err error) {
 	}
 	// 寄存器长度
 	if _, ok := config["len"]; ok {
-		mp.registerLen = uint16(config["address"].(int))
+		mp.registerLen = uint16(config["len"].(int))
 	}
 	// 是否是写
 	if _, ok := config["isWrite"]; ok {
