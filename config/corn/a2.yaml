@@ -3,7 +3,13 @@ target: modbus
 cron: "*/10 * * * * ?"
 retry: 3
 packet:
-- address: aaa
+-
+  transactionID: 0
+  slaveID: 1
+  address: 1
+  len: 1
+  isWrite: false
+  itemType: bool
 handler:
 - type: report
   target: upsidemock
