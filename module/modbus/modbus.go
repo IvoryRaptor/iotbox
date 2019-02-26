@@ -84,9 +84,18 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			log.Fatal("read error  ", err)
 			return
 		}
-		log.Println("recv tcp frame", buf)
+		if p.Verify(buf) != nil {
+			log.Printf("[%s] ===> verify error[%s]\n", p.GetName(), err)
+			return
+		}
+		value, errDecode := p.Decode(buf)
+		if errDecode != nil {
+			log.Printf("[%s] ===> Decode error[%s]\n", p.GetName(), errDecode)
+			return
+		}
+		log.Println("recv tcp frame", buf, value)
 		m.Response <- common.Packet{
-			"value": buf,
+			"value": value,
 		}
 	}()
 	// go func() {

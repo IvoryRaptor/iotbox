@@ -4,6 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
+	"log"
+	"math"
+	"time"
 )
 
 const (
@@ -16,6 +19,7 @@ const (
 type NetModbusProtocol struct {
 	Protocol
 }
+
 // CreateNetModbusProtocol 构造器
 func CreateNetModbusProtocol() *NetModbusProtocol {
 	return &NetModbusProtocol{}
@@ -42,8 +46,45 @@ func (mp *NetModbusProtocol) Encode(config map[interface{}]interface{}) (data []
 }
 
 // Decode 解包
-func (mp *NetModbusProtocol) Decode(data []byte) (item []common.ADataItem, err error) {
-	return nil, nil
+func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err error) {
+	res := make([]common.ADataItem, 0)
+	item := common.ADataItem{Name: mp.Name, ValueType: mp.valueType, AampleTime: time.Now()}
+	// 5个0 5byte
+	// 长度 1byte
+	// 站地址 1byte
+	// 功能吗 1byte
+	// 剩余长度 1byte
+	// 数据
+	itemData := data[9:]
+	log.Printf("[%s]===> Decode data %v\n", mp.GetName(), itemData)
+	switch mp.valueType {
+	case "bool":
+		if itemData[0] == 0 {
+			item.RawValue = false
+		} else {
+			item.RawValue = true
+		}
+		item.ConversionValue = item.RawValue
+	case "int":
+		switch len(itemData) {
+		case 1:
+			item.RawValue = itemData[0]
+		case 2:
+			item.RawValue = binary.BigEndian.Uint16(itemData)
+		case 4:
+			item.RawValue = binary.BigEndian.Uint32(itemData)
+		}
+		item.ConversionValue = item.RawValue
+	case "float":
+		item.RawValue = math.Float32frombits(binary.BigEndian.Uint32(itemData))
+	case "string":
+		item.RawValue = string(itemData)
+		item.ConversionValue = item.RawValue
+	default:
+		log.Fatalf("[%s]===> Decode valueType error[%s]\n", mp.GetName(), mp.valueType)
+	}
+	res = append(res, item)
+	return res, nil
 }
 
 // Verify 包校验

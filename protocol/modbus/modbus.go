@@ -1,12 +1,14 @@
 package modbus
 
 import (
+	"github.com/IvoryRaptor/iotbox/common"
 	"encoding/binary"
 	"log"
 )
 
 // Protocol modbus 协议
 type Protocol struct {
+	common.AProtocol
 	// 传输标识（net使用）
 	transactionID uint16
 	// 设备地址
@@ -18,7 +20,7 @@ type Protocol struct {
 	// 是否是写操作
 	isWrite bool
 	// bool int string float
-	itemType string
+	valueType string
 	// 功能码
 	funcCode byte
 }
@@ -54,8 +56,8 @@ func (mp *Protocol) Config(config map[interface{}]interface{}) (err error) {
 		mp.isWrite = config["isWrite"].(bool)
 	}
 	// 数据类型
-	if _, ok := config["itemType"]; ok {
-		mp.itemType = config["itemType"].(string)
+	if _, ok := config["valueType"]; ok {
+		mp.valueType = config["valueType"].(string)
 	}
 	log.Println("address", mp.registerAddress , "len", mp.registerLen)
 	if mp.isWrite {

@@ -6,10 +6,10 @@ packet:
 -
   transactionID: 0
   slaveID: 1
-  address: 10001
+  address: 30001
   len: 2
   isWrite: false
-  itemType: bool
+  valueType: int
 handler:
 - type: report
   target: upsidemock
