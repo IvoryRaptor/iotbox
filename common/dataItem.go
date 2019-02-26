@@ -29,3 +29,8 @@ type ADataItem struct {
 	// 采样状态
 	SampleStatus int
 }
+
+// ToValue 转换值
+func (item *ADataItem) ToValue([]byte) error {
+	return nil
+}

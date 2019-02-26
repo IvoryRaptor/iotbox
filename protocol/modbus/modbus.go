@@ -1,8 +1,8 @@
 package modbus
 
 import (
-	"github.com/IvoryRaptor/iotbox/common"
 	"encoding/binary"
+	"github.com/IvoryRaptor/iotbox/common"
 	"log"
 )
 
@@ -59,7 +59,7 @@ func (mp *Protocol) Config(config map[interface{}]interface{}) (err error) {
 	if _, ok := config["valueType"]; ok {
 		mp.valueType = config["valueType"].(string)
 	}
-	log.Println("address", mp.registerAddress , "len", mp.registerLen)
+	log.Println("address", mp.registerAddress, "len", mp.registerLen)
 	if mp.isWrite {
 		switch {
 		case mp.registerAddress >= 1 && mp.registerAddress <= 9999:
