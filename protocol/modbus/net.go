@@ -60,10 +60,10 @@ func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err 
 	case "int", "float":
 		// 可以对字节任意排序
 		if len(itemData) < 4 {
-			itemData = append(make([]byte, 4 - len(itemData)), itemData...)
+			itemData = append(make([]byte, 4-len(itemData)), itemData...)
 		}
 	}
-	if err:=item.ByteToValue(itemData) ; err !=nil {
+	if err := item.ByteToValue(itemData); err != nil {
 		log.Fatalf("[%s]===> Decode ByteToValue %s\n", mp.GetName(), err)
 	}
 	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
