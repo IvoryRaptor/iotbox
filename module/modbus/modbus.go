@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -77,8 +78,38 @@ func (m *Modbus) createConnect(timeout int) (io.ReadWriteCloser, error) {
 	var res io.ReadWriteCloser
 	switch strings.ToLower(m.portType) {
 	case "serial":
-		config := &serial.Config{Name: m.port, Baud: 115200,
+		config := &serial.Config{Name: m.port, Baud: 9600,
 			ReadTimeout: time.Duration(timeout) * time.Millisecond}
+		serialConfig := strings.Split(m.portConfig, ",")
+		if len(serialConfig) == 4 {
+			if baud, err := strconv.Atoi(serialConfig[0]); err == nil {
+				config.Baud = baud
+			}
+			if size, err := strconv.Atoi(serialConfig[1]); err == nil {
+				config.Size = byte(size)
+			}
+			switch strings.ToLower(serialConfig[2]) {
+			case "n":
+				config.Parity = serial.ParityNone
+			case "o":
+				config.Parity = serial.ParityOdd
+			case "e":
+				config.Parity = serial.ParityEven
+			case "m":
+				config.Parity = serial.ParityMark
+			case "s":
+				config.Parity = serial.ParitySpace
+			}
+			switch serialConfig[3] {
+			case "1":
+				config.StopBits = serial.Stop1
+			case "2":
+				config.StopBits = serial.Stop2
+			case "1.5":
+				config.StopBits = serial.Stop1Half
+			}
+		}
+		log.Printf("[%s][%s]===>config %#v", m.GetName(), m.port, config)
 		port, err := serial.OpenPort(config)
 		if err != nil {
 			return nil, fmt.Errorf("[%s]==> connect[%s] error[%s]",
