@@ -24,8 +24,10 @@ type Modbus struct {
 	port string
 	// 模块的通道配置 对应serial（115200,8,n,1）对应net（udp、tcp）
 	portConfig string
-	// 模块使用通道前延时，单位ms
-	idle int
+	// 通道空闲时间,用于接收数据后空闲多久认为帧结束 单位ms
+	idleTime int
+	// 发送延时,单位ms
+	sendDelay int
 }
 
 // GetName 获取模块名
@@ -51,35 +53,57 @@ func (m *Modbus) Config(_ common.IKernel, config map[string]interface{}) error {
 		m.portConfig = config["portConfig"].(string)
 	}
 
-	if _, ok := config["idle"]; ok {
-		m.idle = config["idle"].(int)
+	if _, ok := config["idleTime"]; ok {
+		m.idleTime = config["idleTime"].(int)
+	}
+	if _, ok := config["sendDelay"]; ok {
+		m.sendDelay = config["sendDelay"].(int)
 	}
 	log.Printf("[%s]==> Config %#v\n", m.GetName(), m)
 	return nil
 }
 
-func read(reader io.Reader) ([]byte, error) {
+func read(reader io.ReadCloser, idleTime int, timeout int) ([]byte, error) {
 	buf := []byte{}
-	for true {
-		tmp := make([]byte, 128)
-		time.Sleep(time.Millisecond * 100)
-		len, err := reader.Read(tmp)
-		buf = append(buf, tmp[:len]...)
-		if err != nil {
-			break
+	ch := make(chan []byte, 10)
+	timer := time.NewTimer(time.Duration(timeout) * time.Millisecond)
+	go func() {
+		for {
+			tmp := make([]byte, 128)
+			len, err := reader.Read(tmp)
+			if len == 0 || err != nil {
+				log.Println("======> reader exit")
+				return
+			}
+			if len > 0 {
+				ch <- tmp[:len]
+			}
+		}
+	}()
+	for {
+		select {
+		case <-timer.C:
+			{
+				timer.Stop()
+				goto breakout
+			}
+		case tmp := <-ch:
+			{
+				buf = append(buf, tmp...)
+				timer.Reset(time.Duration(idleTime) * time.Millisecond)
+			}
 		}
 	}
+breakout:
 	return buf, nil
 }
 
 // createConnect 创建链接
-// 参数 超时时间 单位ms
-func (m *Modbus) createConnect(timeout int) (io.ReadWriteCloser, error) {
+func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 	var res io.ReadWriteCloser
 	switch strings.ToLower(m.portType) {
 	case "serial":
-		config := &serial.Config{Name: m.port, Baud: 9600,
-			ReadTimeout: time.Duration(timeout) * time.Millisecond}
+		config := &serial.Config{Name: m.port, Baud: 9600}
 		serialConfig := strings.Split(m.portConfig, ",")
 		if len(serialConfig) == 4 {
 			if baud, err := strconv.Atoi(serialConfig[0]); err == nil {
@@ -122,7 +146,6 @@ func (m *Modbus) createConnect(timeout int) (io.ReadWriteCloser, error) {
 			return nil, fmt.Errorf("[%s]==> error[%s] error[%s]",
 				m.GetName(), m.port, err)
 		}
-		conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Millisecond))
 		res = conn
 	default:
 		log.Fatalf("[%s]==> Send portType error[%s]\n", m.GetName(), m.portType)
@@ -159,7 +182,7 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		if _, ok := packet["timeout"]; ok {
 			timeout = packet["timeout"].(int)
 		}
-		conn, err = m.createConnect(timeout)
+		conn, err = m.createConnect()
 		if err != nil {
 			goto breakout
 		}
@@ -174,10 +197,10 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		log.Printf("[%s][%s]==> Send frame [% X]\n", m.GetName(), m.port, sendBuf)
-		// sleep idle time
-		time.Sleep(time.Millisecond * time.Duration(m.idle))
+		// sleep sendDelay time
+		time.Sleep(time.Millisecond * time.Duration(m.sendDelay))
 		conn.Write(sendBuf)
-		recvBuf, err = read(conn)
+		recvBuf, err = read(conn, m.idleTime, timeout)
 		if err != nil {
 			goto breakout
 		}
