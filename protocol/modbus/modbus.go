@@ -23,6 +23,7 @@ type Protocol struct {
 	valueType string
 	// 功能码
 	funcCode byte
+	timeout  int
 }
 
 type dataUnit struct {
@@ -59,6 +60,11 @@ func (mp *Protocol) Config(config map[string]interface{}) (err error) {
 	if _, ok := config["valueType"]; ok {
 		mp.valueType = config["valueType"].(string)
 	}
+	// 超时时间
+	if _, ok := config["timeout"]; ok {
+		mp.timeout = config["timeout"].(int)
+	}
+
 	log.Println("address", mp.registerAddress, "len", mp.registerLen)
 	if mp.isWrite {
 		switch {

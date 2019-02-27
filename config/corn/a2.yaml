@@ -11,6 +11,8 @@ packet:
   len: 1
   isWrite: false
   valueType: int
+  # 读取超时时间，单位为ms
+  timeout: 2000
 handler:
 - type: report
   target: upsidemock

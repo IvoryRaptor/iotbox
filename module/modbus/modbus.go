@@ -154,7 +154,12 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		var err error
 		var sendBuf, recvBuf []byte
 		var value []common.ADataItem
-		conn, err = m.createConnect(2000)
+		timeout := 2000
+		// 超时时间
+		if _, ok := packet["timeout"]; ok {
+			timeout = packet["timeout"].(int)
+		}
+		conn, err = m.createConnect(timeout)
 		if err != nil {
 			goto breakout
 		}
@@ -169,6 +174,8 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		log.Printf("[%s][%s]==> Send frame [% X]\n", m.GetName(), m.port, sendBuf)
+		// sleep idle time
+		time.Sleep(time.Millisecond * time.Duration(m.idle))
 		conn.Write(sendBuf)
 		recvBuf, err = read(conn)
 		if err != nil {
