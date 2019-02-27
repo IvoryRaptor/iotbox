@@ -1,14 +1,15 @@
 package modbus
 
 import (
+	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/protocol/modbus"
 	"github.com/tarm/serial"
 	"io"
 	"log"
 	"net"
-	"time"
 	"strings"
+	"time"
 )
 
 // Modbus 模块
@@ -70,69 +71,92 @@ func read(reader io.Reader) ([]byte, error) {
 	return buf, nil
 }
 
-// Send 发送数据
-func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s]==> Send\n", m.GetName())
-	var rw io.ReadWriter
-	var iProtocol common.IProtocol
+// createConnect 创建链接
+// 参数 超时时间 单位ms
+func (m *Modbus) createConnect(timeout int) (io.ReadWriteCloser, error) {
+	var res io.ReadWriteCloser
 	switch strings.ToLower(m.portType) {
 	case "serial":
-		config := &serial.Config{Name: m.port, Baud: 115200, ReadTimeout: time.Second}
+		config := &serial.Config{Name: m.port, Baud: 115200,
+			ReadTimeout: time.Duration(timeout) * time.Millisecond}
 		port, err := serial.OpenPort(config)
 		if err != nil {
-			log.Fatalf("[%s]==> connect[%s] error[%s]\n",m.GetName(),m.port, err)
-			return m.Response
+			return nil, fmt.Errorf("[%s]==> connect[%s] error[%s]",
+				m.GetName(), m.port, err)
 		}
-		defer port.Close()
-		rw = port
+		res = port
 	case "net":
 		conn, err := net.Dial(strings.ToLower(m.portConfig), m.port)
 		if err != nil {
-			log.Fatalf("[%s]==> connect[%s] error[%s]\n",m.GetName(),m.port, err)
-			return m.Response
+			return nil, fmt.Errorf("[%s]==> error[%s] error[%s]",
+				m.GetName(), m.port, err)
 		}
-		defer conn.Close()
-		conn.SetReadDeadline(time.Now().Add(time.Second * 3))
-		rw = conn
+		conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Millisecond))
+		res = conn
 	default:
-		log.Fatalf("%s]==> Send portType error[%s]\n", m.GetName(), m.portType)
+		log.Fatalf("[%s]==> Send portType error[%s]\n", m.GetName(), m.portType)
+		return nil, fmt.Errorf("[%s]==> portType error[%s]",
+			m.GetName(), m.portType)
+	}
+	return res, nil
+}
+
+// createProtocol 创建协议
+func (m *Modbus) createProtocol() (common.IProtocol, error) {
+	var res common.IProtocol
+	switch strings.ToLower(m.protocolType) {
+	case "net":
+		res = modbus.CreateNetModbusProtocol()
+	default:
+		return nil, fmt.Errorf("[%s]==> Send protocolType not support[%s]",
+			m.GetName(), m.protocolType)
+	}
+	return res, nil
+}
+
+// Send 发送数据
+func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
+	log.Printf("[%s]==> Send\n", m.GetName())
+	var conn io.ReadWriteCloser
+	var protocol common.IProtocol
+	var err error
+	conn, err = m.createConnect(2000)
+	if err != nil {
+		m.Response <- nil
 		return m.Response
 	}
-	switch strings.ToLower(m.protocolType){
-		case "rtu":
-		case "net":
-			iProtocol = modbus.CreateNetModbusProtocol()
-		case "ascii":
-		default:
-			log.Fatalf("[%s]==> Send protocolType error[%s]\n", m.GetName(), m.protocolType)
-			return m.Response
+	defer conn.Close()
+	protocol, err = m.createProtocol()
+	if err != nil {
+		m.Response <- nil
+		return m.Response
 	}
-	iProtocol.Config(packet)
-	sendBuf, err := iProtocol.Encode(packet)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Printf("[%s]==> Send frame [% X]\n", m.GetName(), sendBuf)
-		rw.Write(sendBuf)
-		readBuf, err := read(rw)
-		if err != nil {
-			log.Fatalf("[%s]==> read error[%s]\n", m.GetName(), err)
-			return m.Response
-		}
-		log.Printf("[%s]==> recv frame [% X]\n", m.GetName(), readBuf)
-		if err := iProtocol.Verify(readBuf) ; err != nil {
-			log.Fatalf("[%s] ===> verify error[%s]\n", iProtocol.GetName(), err)
-			return m.Response
-		}
-		value, errDecode := iProtocol.Decode(readBuf)
-		if errDecode != nil {
-			log.Printf("[%s] ===> Decode error[%s]\n", iProtocol.GetName(), errDecode)
-			return m.Response
-		}
-		log.Printf("[%s] ===> Decode value [%#v]\n", iProtocol.GetName(), value)
-		m.Response <- common.Packet{
-			"value": value,
-		}
+	protocol.Config(packet)
+	sendBuf, err := protocol.Encode(packet)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("[%s]==> Send frame [% X]\n", m.GetName(), sendBuf)
+	conn.Write(sendBuf)
+	readBuf, err := read(conn)
+	if err != nil {
+		log.Fatalf("[%s]==> read error[%s]\n", m.GetName(), err)
+		return m.Response
+	}
+	log.Printf("[%s]==> recv frame [% X]\n", m.GetName(), readBuf)
+	if err := protocol.Verify(readBuf); err != nil {
+		log.Fatalf("[%s] ===> verify error[%s]\n", protocol.GetName(), err)
+		return m.Response
+	}
+	value, errDecode := protocol.Decode(readBuf)
+	if errDecode != nil {
+		log.Printf("[%s] ===> Decode error[%s]\n", protocol.GetName(), errDecode)
+		return m.Response
+	}
+	log.Printf("[%s] ===> Decode value [%#v]\n", protocol.GetName(), value)
+	m.Response <- common.Packet{
+		"value": value,
+	}
 	return m.Response
 }
 
