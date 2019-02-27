@@ -3,23 +3,27 @@ package modbus
 import (
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/protocol/modbus"
+	"github.com/tarm/serial"
 	"io"
 	"log"
 	"net"
 	"time"
+	"strings"
 )
-
-// "github.com/tarm/serial"
 
 // Modbus 模块
 type Modbus struct {
 	common.AModule
-	config     map[string]interface{}
-	wait       time.Duration
-	frame      string
-	port       string
+	// 协议类型和模块有关 对于modbus取值有（rtu、net、ascii）
+	protocolType string
+	// 模块的通道类型 对于modbus取值有（serial、net）
+	portType string
+	// 模块的通道地址 例如（192.168.1.234:502、/dev/tty.usbserial）
+	port string
+	// 模块的通道配置 对应serial（115200,8,n,1）对应net（udp、tcp）
 	portConfig string
-	address    int
+	// 模块使用通道前延时，单位ms
+	idle int
 }
 
 // GetName 获取模块名
@@ -29,13 +33,26 @@ func (m *Modbus) GetName() string {
 
 // Config 配置模块
 func (m *Modbus) Config(_ common.IKernel, config map[string]interface{}) error {
-	log.Print("Config\n")
-	m.config = config
-	m.wait = time.Duration(config["wait"].(int)) * time.Second
-	m.frame = config["frame"].(string)
-	m.port = config["port"].(string)
-	m.portConfig = config["portConfig"].(string)
-	m.address = config["address"].(int)
+	if _, ok := config["protocolType"]; ok {
+		m.protocolType = config["protocolType"].(string)
+	}
+
+	if _, ok := config["portType"]; ok {
+		m.portType = config["portType"].(string)
+	}
+
+	if _, ok := config["port"]; ok {
+		m.port = config["port"].(string)
+	}
+
+	if _, ok := config["portConfig"]; ok {
+		m.portConfig = config["portConfig"].(string)
+	}
+
+	if _, ok := config["idle"]; ok {
+		m.idle = config["idle"].(int)
+	}
+	log.Printf("[%s]==> Config %#v\n", m.GetName(), m)
 	return nil
 }
 
@@ -55,63 +72,67 @@ func read(reader io.Reader) ([]byte, error) {
 
 // Send 发送数据
 func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s] send\n", m.GetName())
-	// config := &serial.Config{Name: m.port, Baud: 115200, ReadTimeout: m.wait}
-	// port, err := serial.OpenPort(config)
-	// if err != nil {
-	// 		log.Fatal(err)
-	// 		return m.Response
-	// }
-	conn, err := net.Dial("tcp", "192.168.1.234:502")
-	if err != nil {
-		log.Fatal(err)
-		return m.Response
-	}
-	go func() {
+	log.Printf("[%s]==> Send\n", m.GetName())
+	var rw io.ReadWriter
+	var iProtocol common.IProtocol
+	switch strings.ToLower(m.portType) {
+	case "serial":
+		config := &serial.Config{Name: m.port, Baud: 115200, ReadTimeout: time.Second}
+		port, err := serial.OpenPort(config)
+		if err != nil {
+			log.Fatalf("[%s]==> connect[%s] error[%s]\n",m.GetName(),m.port, err)
+			return m.Response
+		}
+		defer port.Close()
+		rw = port
+	case "net":
+		conn, err := net.Dial(strings.ToLower(m.portConfig), m.port)
+		if err != nil {
+			log.Fatalf("[%s]==> connect[%s] error[%s]\n",m.GetName(),m.port, err)
+			return m.Response
+		}
 		defer conn.Close()
 		conn.SetReadDeadline(time.Now().Add(time.Second * 3))
-		var p common.IProtocol
-		p = modbus.CreateNetModbusProtocol()
-		p.Config(packet)
-		sendBuf, err := p.Encode(packet)
+		rw = conn
+	default:
+		log.Fatalf("%s]==> Send portType error[%s]\n", m.GetName(), m.portType)
+		return m.Response
+	}
+	switch strings.ToLower(m.protocolType){
+		case "rtu":
+		case "net":
+			iProtocol = modbus.CreateNetModbusProtocol()
+		case "ascii":
+		default:
+			log.Fatalf("[%s]==> Send protocolType error[%s]\n", m.GetName(), m.protocolType)
+			return m.Response
+	}
+	iProtocol.Config(packet)
+	sendBuf, err := iProtocol.Encode(packet)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println("send tcp frame", sendBuf)
-		conn.Write(sendBuf)
-		buf, err := read(conn)
+		log.Printf("[%s]==> Send frame [% X]\n", m.GetName(), sendBuf)
+		rw.Write(sendBuf)
+		readBuf, err := read(rw)
 		if err != nil {
-			log.Fatal("read error  ", err)
-			return
+			log.Fatalf("[%s]==> read error[%s]\n", m.GetName(), err)
+			return m.Response
 		}
-		if p.Verify(buf) != nil {
-			log.Printf("[%s] ===> verify error[%s]\n", p.GetName(), err)
-			return
+		log.Printf("[%s]==> recv frame [% X]\n", m.GetName(), readBuf)
+		if err := iProtocol.Verify(readBuf) ; err != nil {
+			log.Fatalf("[%s] ===> verify error[%s]\n", iProtocol.GetName(), err)
+			return m.Response
 		}
-		value, errDecode := p.Decode(buf)
+		value, errDecode := iProtocol.Decode(readBuf)
 		if errDecode != nil {
-			log.Printf("[%s] ===> Decode error[%s]\n", p.GetName(), errDecode)
-			return
+			log.Printf("[%s] ===> Decode error[%s]\n", iProtocol.GetName(), errDecode)
+			return m.Response
 		}
-		log.Println("recv tcp frame", buf, value)
+		log.Printf("[%s] ===> Decode value [%#v]\n", iProtocol.GetName(), value)
 		m.Response <- common.Packet{
 			"value": value,
 		}
-	}()
-	// go func() {
-	// 	defer port.Close()
-	// 	port.Write([]byte(`{"type":"ping"}`))
-	// 	buf, err := read(port)
-	// 	if err != nil {
-	// 		log.Fatal("read error  ", err)
-	// 		return
-	// 	}
-	// 	n := len(buf)
-	// 	log.Printf("[%s] recv %d %q", m.GetName(), n, buf[:n])
-	// 	m.Response <- common.Packet{
-	// 		"value": buf,
-	// 	}
-	// }()
 	return m.Response
 }
 

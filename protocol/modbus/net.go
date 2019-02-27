@@ -55,7 +55,7 @@ func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err 
 	// 剩余长度 1byte
 	// 数据
 	itemData := data[9:]
-	log.Printf("[%s]===> Decode data %v\n", mp.GetName(), itemData)
+	log.Printf("[%s]===> Decode data % X\n", mp.GetName(), itemData)
 	switch mp.valueType {
 	case "int", "float":
 		// 可以对字节任意排序
