@@ -31,7 +31,7 @@ type dataUnit struct {
 }
 
 // Config 配置协议解析和编码的字段
-func (mp *Protocol) Config(config map[interface{}]interface{}) (err error) {
+func (mp *Protocol) Config(config map[string]interface{}) (err error) {
 	// 传输标识（net使用）
 	log.Println(config)
 	if _, ok := config["transactionID"]; ok {

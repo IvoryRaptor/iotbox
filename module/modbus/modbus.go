@@ -116,47 +116,51 @@ func (m *Modbus) createProtocol() (common.IProtocol, error) {
 
 // Send 发送数据
 func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s]==> Send\n", m.GetName())
-	var conn io.ReadWriteCloser
-	var protocol common.IProtocol
-	var err error
-	conn, err = m.createConnect(2000)
-	if err != nil {
+	log.Printf("[%s][%s]==> Send\n", m.GetName(), m.port)
+	go func() {
+		var conn io.ReadWriteCloser
+		var protocol common.IProtocol
+		var err error
+		var sendBuf, recvBuf []byte
+		var value []common.ADataItem
+		conn, err = m.createConnect(2000)
+		if err != nil {
+			goto breakout
+		}
+		defer conn.Close()
+		protocol, err = m.createProtocol()
+		if err != nil {
+			goto breakout
+		}
+		protocol.Config(packet)
+		sendBuf, err = protocol.Encode(packet)
+		if err != nil {
+			goto breakout
+		}
+		log.Printf("[%s][%s]==> Send frame [% X]\n", m.GetName(), m.port, sendBuf)
+		conn.Write(sendBuf)
+		recvBuf, err = read(conn)
+		if err != nil {
+			goto breakout
+		}
+		log.Printf("[%s][%s]==> recv frame [% X]\n", m.GetName(), m.port, recvBuf)
+		if err := protocol.Verify(recvBuf); err != nil {
+			goto breakout
+		}
+		value, err = protocol.Decode(recvBuf)
+		if err != nil {
+			goto breakout
+		}
+		log.Printf("[%s]===> Decode value [%#v]\n", protocol.GetName(), value)
+		m.Response <- common.Packet{
+			"value": value,
+		}
+		return
+	breakout:
+		log.Printf("[%s][%s]====> %s", m.GetName(), m.port, err)
 		m.Response <- nil
-		return m.Response
-	}
-	defer conn.Close()
-	protocol, err = m.createProtocol()
-	if err != nil {
-		m.Response <- nil
-		return m.Response
-	}
-	protocol.Config(packet)
-	sendBuf, err := protocol.Encode(packet)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("[%s]==> Send frame [% X]\n", m.GetName(), sendBuf)
-	conn.Write(sendBuf)
-	readBuf, err := read(conn)
-	if err != nil {
-		log.Fatalf("[%s]==> read error[%s]\n", m.GetName(), err)
-		return m.Response
-	}
-	log.Printf("[%s]==> recv frame [% X]\n", m.GetName(), readBuf)
-	if err := protocol.Verify(readBuf); err != nil {
-		log.Fatalf("[%s] ===> verify error[%s]\n", protocol.GetName(), err)
-		return m.Response
-	}
-	value, errDecode := protocol.Decode(readBuf)
-	if errDecode != nil {
-		log.Printf("[%s] ===> Decode error[%s]\n", protocol.GetName(), errDecode)
-		return m.Response
-	}
-	log.Printf("[%s] ===> Decode value [%#v]\n", protocol.GetName(), value)
-	m.Response <- common.Packet{
-		"value": value,
-	}
+		return
+	}()
 	return m.Response
 }
 

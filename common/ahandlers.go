@@ -8,7 +8,7 @@ type AHandlers struct {
 func (m *AHandlers) ConfigHandlers(kernel IKernel, configs []interface{}) error {
 	m.handlers = make([]ICloneTask, len(configs))
 	for i, c := range configs {
-		config := c.(map[interface{}]interface{})
+		config := c.(map[string]interface{})
 		if item, err := kernel.CreateTask(config); err != nil {
 			return err
 		} else {

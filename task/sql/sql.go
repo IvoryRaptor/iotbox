@@ -31,7 +31,7 @@ func (s *Sql) Clone() common.ICloneTask {
 	return result
 }
 
-func (s *Sql) SqlConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
+func (s *Sql) SqlConfig(kernel common.IKernel, config map[string]interface{}) error {
 	var err error
 	s.SetCurrentWork(s.SqlWork)
 	s.tpl, err = template.New("").Parse(config["sql"].(string))

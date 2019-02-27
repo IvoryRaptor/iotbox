@@ -3,8 +3,8 @@ package common
 // IProtocol 协议标准接口
 type IProtocol interface {
 	GetName() string
-	Encode(config map[interface{}]interface{}) (data []byte, err error)
-	Config(config map[interface{}]interface{}) ( err error)
+	Encode(config map[string]interface{}) (data []byte, err error)
+	Config(config map[string]interface{}) ( err error)
 	Decode(data []byte) (items []ADataItem, err error)
 	Verify(data []byte) (err error)
 }

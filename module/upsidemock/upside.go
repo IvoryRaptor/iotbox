@@ -22,9 +22,9 @@ func (m *Upside) Config(kernel common.IKernel, config map[string]interface{}) er
 			task := owner.CreateOwner()
 			task.Config(
 				kernel,
-				map[interface{}]interface{}{
+				map[string]interface{}{
 					"target": "downsidemock",
-					"request": map[interface{}]interface{}{
+					"request": map[string]interface{}{
 						"address": "ddd",
 					},
 				},

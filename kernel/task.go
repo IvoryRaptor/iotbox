@@ -10,7 +10,7 @@ import (
 	"github.com/IvoryRaptor/iotbox/task/qa"
 )
 
-func (k *Kernel) CreateTask(config map[interface{}]interface{}) (common.ITask, error) {
+func (k *Kernel) CreateTask(config map[string]interface{}) (common.ITask, error) {
 	taskType := config["type"].(string)
 	var result common.ITask
 	switch taskType {

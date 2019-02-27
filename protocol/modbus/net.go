@@ -30,7 +30,7 @@ func (mp *NetModbusProtocol) GetName() string {
 }
 
 // Encode 组包
-func (mp *NetModbusProtocol) Encode(config map[interface{}]interface{}) (data []byte, err error) {
+func (mp *NetModbusProtocol) Encode(config map[string]interface{}) (data []byte, err error) {
 	dataUnit := dataUnit{}
 	dataUnit.funcCode = mp.funcCode
 	switch mp.funcCode {
@@ -73,6 +73,9 @@ func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err 
 
 // Verify 包校验
 func (mp *NetModbusProtocol) Verify(data []byte) (err error) {
+	if len(data) < 9 {
+		return fmt.Errorf("[%s]==> len error[%d]", mp.GetName(), len(data))
+	}
 	// 传输ID
 	responseTransactionID := binary.BigEndian.Uint16(data)
 	if responseTransactionID != mp.transactionID {

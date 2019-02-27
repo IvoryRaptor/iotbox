@@ -28,7 +28,7 @@ func (m *Corn) Config(kernel common.IKernel, config map[string]interface{}) erro
 			if err != nil {
 				return err
 			}
-			var config map[interface{}]interface{}
+			var config map[string]interface{}
 			if err := yaml.Unmarshal(data, &config); err != nil {
 				return err
 			}
