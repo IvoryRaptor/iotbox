@@ -137,21 +137,18 @@ func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 		log.Printf("[%s][%s]===>config %#v", m.GetName(), m.port, config)
 		port, err := serial.OpenPort(config)
 		if err != nil {
-			return nil, fmt.Errorf("[%s]==> connect[%s] error[%s]",
-				m.GetName(), m.port, err)
+			return nil, fmt.Errorf("connect[%s] error[%s]", m.port, err)
 		}
 		res = port
 	case "net":
 		conn, err := net.Dial(strings.ToLower(m.portConfig), m.port)
 		if err != nil {
-			return nil, fmt.Errorf("[%s]==> error[%s] error[%s]",
-				m.GetName(), m.port, err)
+			return nil, fmt.Errorf("net[%s] error[%s]",m.port, err)
 		}
 		res = conn
 	default:
-		log.Fatalf("[%s]==> Send portType error[%s]\n", m.GetName(), m.portType)
-		return nil, fmt.Errorf("[%s]==> portType error[%s]",
-			m.GetName(), m.portType)
+		log.Fatalf("portType error[%s]\n", m.portType)
+		return nil, fmt.Errorf("portType error[%s]", m.portType)
 	}
 	return res, nil
 }
@@ -163,8 +160,7 @@ func (m *Modbus) createProtocol() (common.IProtocol, error) {
 	case "net":
 		res = modbus.CreateNetModbusProtocol()
 	default:
-		return nil, fmt.Errorf("[%s]==> Send protocolType not support[%s]",
-			m.GetName(), m.protocolType)
+		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)
 	}
 	return res, nil
 }
