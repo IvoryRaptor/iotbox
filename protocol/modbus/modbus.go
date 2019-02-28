@@ -35,6 +35,11 @@ type dataUnit struct {
 func (mp *Protocol) Config(config map[string]interface{}) (err error) {
 	// 传输标识（net使用）
 	log.Println(config)
+
+	if _, ok := config["name"]; ok {
+		mp.Name = config["name"].(string)
+	}
+
 	if _, ok := config["transactionID"]; ok {
 		mp.transactionID = uint16(config["transactionID"].(int))
 	} else {
