@@ -8,6 +8,7 @@ import (
 	"github.com/IvoryRaptor/iotbox/module/sqlite"
 	"github.com/IvoryRaptor/iotbox/module/upsidemock"
 	"github.com/IvoryRaptor/iotbox/module/modbus"
+	"github.com/IvoryRaptor/iotbox/module/mqtt"
 )
 
 func (k *Kernel) CreateModule(config map[string]interface{}) (common.IModule, error) {
@@ -24,6 +25,8 @@ func (k *Kernel) CreateModule(config map[string]interface{}) (common.IModule, er
 		result = upsidemock.CreateUpside()
 	case "modbus":
 		result = modbus.Create()
+	case "mqtt":
+		result = mqtt.Create()
 	}
 	if result == nil {
 		return nil, fmt.Errorf(fmt.Sprintf("Unknown Module Type [%s]", channelType))

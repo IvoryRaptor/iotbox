@@ -27,7 +27,7 @@ type AMqtt struct {
 
 // GetName 获取模块名
 func (m *AMqtt) GetName() string {
-	return "RootCloud"
+	return "mqtt"
 }
 
 // Config 配置模块
@@ -95,9 +95,9 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	return m.Response
 }
 
-// Create 创建树根云上报对象
+// Create 创建mqtt 上报对象
 func Create() *AMqtt {
-	log.Println("Create RootCloud module")
+	log.Println("Create upload mqtt module")
 	return &AMqtt{}
 }
 
