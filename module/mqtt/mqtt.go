@@ -70,6 +70,7 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		if !m.client.IsConnected() {
 			if err := m.createConnect(); err != nil {
 				log.Fatalf("[%s]===> %s", m.GetName(), err)
+				m.Response <- nil
 				return
 			}
 		}
@@ -88,10 +89,10 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		if err := token.Error(); err != nil {
 			log.Fatalf("[%s]===> %s", m.GetName(), err)
 		}
-		rc.Response <- nil
+		m.Response <- nil
 		return
 	}()
-	return rc.Response
+	return m.Response
 }
 
 // Create 创建树根云上报对象
