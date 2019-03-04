@@ -64,7 +64,7 @@ func (m *Modbus) Config(_ common.IKernel, config map[string]interface{}) error {
 	return nil
 }
 
-func read(reader io.ReadCloser, idleTime int, timeout int) ([]byte, error) {
+func read(reader io.Reader, idleTime int, timeout int) ([]byte, error) {
 	buf := []byte{}
 	ch := make(chan []byte, 10)
 	timer := time.NewTimer(time.Duration(timeout) * time.Millisecond)

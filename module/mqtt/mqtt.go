@@ -65,7 +65,7 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 
 // Send 发送数据
 func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s]==> Send\n", m.GetName())
+	log.Printf("[%s]==> Send %s\n", m.GetName(), string(packet["value"].([]byte)))
 	go func() {
 		if !m.client.IsConnected() {
 			if err := m.createConnect(); err != nil {
@@ -74,17 +74,17 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 				return
 			}
 		}
-		text := `
-		{
-		  "DO01": true,
-		  "AO01": -121,
-		  "AO02": 12341,
-		  "AI03": 456,
-		  "AI04": 3.14,
-		  "AI05": 3.14544
-		}
-		`
-		token := m.client.Publish(m.topic, m.qos, false, text)
+		// text := `
+		// {
+		//   "DO01": true,
+		//   "AO01": -121,
+		//   "AO02": 12341,
+		//   "AI03": 456,
+		//   "AI04": 3.14,
+		//   "AI05": 3.14544
+		// }
+		// `
+		token := m.client.Publish(m.topic, m.qos, false, packet["value"])
 		token.Wait()
 		if err := token.Error(); err != nil {
 			log.Fatalf("[%s]===> %s", m.GetName(), err)

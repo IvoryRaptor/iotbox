@@ -4,7 +4,7 @@ cron: "*/10 * * * * ?"
 retry: 3
 packet:
 -
-  name: test
+  name: AO02
   transactionID: 0
   slaveID: 1
   address: 30001
@@ -18,5 +18,5 @@ handler:
   sql: "INSERT INTO DATA(NAME, VALUETYPE, RAWVALUE, CONVERSIONVALUE, SAMPLETIME, SAMPLESTATUS)
   VALUES ('{{.Name}}', '{{.ValueType}}', '{{.RawValue}}', '{{.ConversionValue}}', datetime('now','localtime'), {{.SampleStatus}})"
   target: sqlite
-- type: report
-  target: upsidemock
+- type: rootcloud
+  target: rootcloud
