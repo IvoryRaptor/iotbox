@@ -29,7 +29,7 @@ func (m *Upside) Config(kernel common.IKernel, config map[string]interface{}) er
 					},
 				},
 			)
-			task.SetOwner(m).Run()
+			// task.SetOwner(m).Run()
 		}
 	}()
 	return nil
