@@ -151,7 +151,7 @@ func (m *AMqtt) createConnect() error {
 func (m *AMqtt) createProtocol() (common.IProtocol, error) {
 	var res common.IProtocol
 	switch strings.ToLower(m.protocolType) {
-	case "net":
+	case "rootcloud":
 		res = rootcloud.Create()
 	default:
 		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)

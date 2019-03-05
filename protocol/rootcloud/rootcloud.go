@@ -40,16 +40,16 @@ func (p *Protocol) Encode(config map[string]interface{}) (data []byte, err error
 	m := make(map[string]interface{})
 	switch cType {
 	case "factor":
-		item := config["value"].(common.ADataItem)
-		m[item.Name] = item.ConversionValue
+		item := config["value"].(map[string]interface{})
+		m[item["Name"].(string)] = item["ConversionValue"]
 		res, err := json.Marshal(m)
 		if err != nil {
 			return nil, fmt.Errorf("[%s]==> Encode json[%s]", err, p.GetName())
 		}
 		return res, nil
 	case "factors":
-		for _, item := range config["value"].([]common.ADataItem) {
-			m[item.Name] = item.ConversionValue
+		for _, item := range config["value"].([]map[string]interface{}) {
+			m[item["Name"].(string)] = item["ConversionValue"]
 		}
 		res, err := json.Marshal(m)
 		if err != nil {

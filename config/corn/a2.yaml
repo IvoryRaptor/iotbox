@@ -18,5 +18,5 @@ handler:
   sql: "INSERT INTO DATA(NAME, VALUETYPE, RAWVALUE, CONVERSIONVALUE, SAMPLETIME, SAMPLESTATUS)
   VALUES ('{{.Name}}', '{{.ValueType}}', '{{.RawValue}}', '{{.ConversionValue}}', datetime('now','localtime'), {{.SampleStatus}})"
   target: sqlite
-- type: rootcloud
+- type: report
   target: rootcloud
