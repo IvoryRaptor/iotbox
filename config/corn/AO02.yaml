@@ -1,6 +1,6 @@
 type: QA
-target: modbus
-cron: "*/10 * * * * ?"
+target: modbus_net_tcp
+cron: "45 * * * * ? "
 retry: 3
 packet:
 -
