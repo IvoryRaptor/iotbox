@@ -10,8 +10,6 @@ clientID: 00000836A7K3
 user: 00000836A7K3
 # 密码
 password: qpBXeFM730/MJ/mMCBqe6w==
-# 上报的主题
-topic: Dev/Status/00000836A7K3/1/lhc20190228
 # 服务质量
 qos: 0
 # 上报主题
