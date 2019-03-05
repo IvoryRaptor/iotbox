@@ -17,10 +17,14 @@ type AMqtt struct {
 	user string
 	// 密码
 	password string
-	// 上报主题
-	topic string
 	// 服务质量
 	qos byte
+	// 协议
+	protocol string
+	// 订阅主题
+	subscribe []string
+	// 推送主题
+	publish []string
 	// mqtt client
 	client MQTT.Client
 }
@@ -47,15 +51,27 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 	if _, ok := config["password"]; ok {
 		m.password = config["password"].(string)
 	}
-	if _, ok := config["topic"]; ok {
-		m.topic = config["topic"].(string)
+	m.subscribe = make([]string, 0)
+	if _, ok := config["subscribe"]; ok && config["subscribe"] != nil {
+		for _, v := range config["subscribe"].([]interface{}) {
+			m.subscribe = append(m.subscribe, v.(string))
+		}
+
+	}
+	m.publish = make([]string, 0)
+	if _, ok := config["publish"]; ok && config["publish"] != nil {
+		for _, v := range config["publish"].([]interface{}) {
+			m.publish = append(m.publish, v.(string))
+		}
+	}
+	if _, ok := config["protocol"]; ok {
+		m.protocol = config["protocol"].(string)
 	}
 	if _, ok := config["qos"]; ok {
 		m.qos = byte(config["qos"].(int))
 	} else {
 		m.qos = 0
 	}
-
 	log.Printf("[%s]==> Config %#v\n", m.GetName(), m)
 	if err := m.createConnect(); err != nil {
 		log.Fatalf("[%s]===> %s", m.GetName(), err)
@@ -74,20 +90,12 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 				return
 			}
 		}
-		// text := `
-		// {
-		//   "DO01": true,
-		//   "AO01": -121,
-		//   "AO02": 12341,
-		//   "AI03": 456,
-		//   "AI04": 3.14,
-		//   "AI05": 3.14544
-		// }
-		// `
-		token := m.client.Publish(m.topic, m.qos, false, packet["value"])
-		token.Wait()
-		if err := token.Error(); err != nil {
-			log.Fatalf("[%s]===> %s", m.GetName(), err)
+		for _, item := range m.publish {
+			token := m.client.Publish(item, m.qos, false, packet["value"])
+			token.Wait()
+			if err := token.Error(); err != nil {
+				log.Fatalf("[%s]===>top[%s] %s", m.GetName(), item, err)
+			}
 		}
 		m.Response <- nil
 		return

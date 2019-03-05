@@ -14,3 +14,9 @@ password: qpBXeFM730/MJ/mMCBqe6w==
 topic: Dev/Status/00000836A7K3/1/lhc20190228
 # 服务质量
 qos: 0
+# 上报主题
+publish:
+  - Dev/Status/00000836A7K3/1/lhc20190228
+# 订阅主题
+# subscribe:
+protocol: rootcloud
