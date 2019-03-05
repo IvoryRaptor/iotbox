@@ -72,7 +72,6 @@ func read(reader io.Reader, idleTime int, timeout int) ([]byte, error) {
 			tmp := make([]byte, 128)
 			len, err := reader.Read(tmp)
 			if len == 0 || err != nil {
-				log.Println("======> reader exit")
 				return
 			}
 			if len > 0 {

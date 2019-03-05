@@ -11,6 +11,4 @@ type IProtocol interface {
 
 // AProtocol 协议结构体
 type AProtocol struct {
-	// 数据项目名称，全局不能重复 和ADataItem Name 进行bind
-	Name string
 }

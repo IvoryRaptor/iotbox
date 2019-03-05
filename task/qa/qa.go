@@ -40,7 +40,7 @@ func (d *QA) StartWork(module common.IModule) (common.WorkState, error) {
 		return common.Failed, errors.New("Timeout ")
 	}
 	d.WorkHandlers(response)
-	log.Printf("[QA] %d Complete\n", response["value"])
+	log.Printf("[QA]==>Complete %#v\n", response)
 	//避免占用时间过长
 	if d.index++; d.index < len(d.request) {
 		return common.Running, nil

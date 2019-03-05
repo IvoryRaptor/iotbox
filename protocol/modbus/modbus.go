@@ -9,6 +9,8 @@ import (
 // Protocol modbus 协议
 type Protocol struct {
 	common.AProtocol
+	// 数据项目名称，全局不能重复 和ADataItem Name 进行bind
+	name string
 	// 传输标识（net使用）
 	transactionID uint16
 	// 设备地址
@@ -37,7 +39,7 @@ func (mp *Protocol) Config(config map[string]interface{}) (err error) {
 	log.Println(config)
 
 	if _, ok := config["name"]; ok {
-		mp.Name = config["name"].(string)
+		mp.name = config["name"].(string)
 	}
 
 	if _, ok := config["transactionID"]; ok {
