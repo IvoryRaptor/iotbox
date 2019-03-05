@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 )
 
 type Sqlite struct {
@@ -27,17 +28,40 @@ func (m *Sqlite) Config(_ common.IKernel, config map[string]interface{}) error {
 	return err
 }
 
+// Send sqlite 执行体
 func (m *Sqlite) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	go func() {
-		fmt.Printf("SQLITE EXEC [%s]\n", packet["sql"])
-		if result, err := m.db.Exec(packet["sql"].(string)); err != nil {
-			m.Response <- common.Packet{
-				"error": err,
+		var err error
+		var value []string
+		// 判断类型是sql
+		if _, ok := packet["type"]; !ok {
+			err = fmt.Errorf("not find type")
+			goto breakout
+		}
+		if _, ok := packet["value"]; !ok {
+			err = fmt.Errorf("not find value")
+			goto breakout
+		}
+		value = packet["value"].([]string)
+		for _, item := range value {
+			log.Printf("[sql]==> %s", item)
+			if _, err = m.db.Exec(item); err != nil {
+				log.Fatalf("[sql]==> err[%s]", err)
 			}
-		} else {
-			m.Response <- common.Packet{
-				"result": result,
-			}
+		}
+		m.Response <- common.Packet{
+			"type":   "sql",
+			"status": "ok",
+			"desc":   nil,
+			"value":  nil,
+		}
+		return
+	breakout:
+		m.Response <- common.Packet{
+			"type":   "sql",
+			"status": "error",
+			"desc":   err,
+			"value":  nil,
 		}
 	}()
 	return m.Response

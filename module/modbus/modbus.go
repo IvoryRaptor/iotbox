@@ -209,11 +209,7 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		log.Printf("[%s]===> Decode value [%#v]\n", protocol.GetName(), value)
-		m.Response <- common.Packet{
-			"type":   "factor",
-			"status": "ok",
-			"value":  value,
-		}
+		m.Response <- value
 		return
 	breakout:
 		log.Printf("[%s][%s]====> %s", m.GetName(), m.port, err)

@@ -67,7 +67,11 @@ func (mp *NetModbusProtocol) Decode(data []byte) (res map[string]interface{}, er
 		log.Fatalf("[%s]===> Decode ByteToValue %s\n", mp.GetName(), err)
 	}
 	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
-	return structs.Map(item), nil
+	return common.Packet{
+		"type":   "factors",
+		"status": "ok",
+		"value":  []map[string]interface{}{structs.Map(item)},
+	}, nil
 }
 
 // Verify 包校验
