@@ -157,6 +157,8 @@ func (m *Modbus) createProtocol() (common.IProtocol, error) {
 	switch strings.ToLower(m.protocolType) {
 	case "net":
 		res = modbus.CreateNetModbusProtocol()
+	case "rtu":
+		res = modbus.CreateRTUModbusProtocol()
 	default:
 		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)
 	}
