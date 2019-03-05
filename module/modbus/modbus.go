@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/fatih/structs"
 )
 
 // Modbus 模块
@@ -143,7 +142,7 @@ func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 	case "net":
 		conn, err := net.Dial(strings.ToLower(m.portConfig), m.port)
 		if err != nil {
-			return nil, fmt.Errorf("net[%s] error[%s]",m.port, err)
+			return nil, fmt.Errorf("net[%s] error[%s]", m.port, err)
 		}
 		res = conn
 	default:
@@ -173,7 +172,7 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		var protocol common.IProtocol
 		var err error
 		var sendBuf, recvBuf []byte
-		var value []common.ADataItem
+		var value map[string]interface{}
 		timeout := 2000
 		// 超时时间
 		if _, ok := packet["timeout"]; ok {
@@ -210,10 +209,11 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		log.Printf("[%s]===> Decode value [%#v]\n", protocol.GetName(), value)
-		// m.Response <- common.Packet{
-		// 	"value": value,
-		// }
-		m.Response <- structs.Map(value[0])
+		m.Response <- common.Packet{
+			"type":   "factor",
+			"status": "ok",
+			"value":  value,
+		}
 		return
 	breakout:
 		log.Printf("[%s][%s]====> %s", m.GetName(), m.port, err)

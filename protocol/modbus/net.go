@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/fatih/structs"
 	"log"
 	"time"
 )
@@ -45,8 +46,7 @@ func (mp *NetModbusProtocol) Encode(config map[string]interface{}) (data []byte,
 }
 
 // Decode 解包
-func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err error) {
-	res := make([]common.ADataItem, 0)
+func (mp *NetModbusProtocol) Decode(data []byte) (res map[string]interface{}, err error) {
 	item := common.ADataItem{Name: mp.Name, ValueType: mp.valueType, SampleTime: time.Now()}
 	// 5个0 5byte
 	// 长度 1byte
@@ -67,8 +67,7 @@ func (mp *NetModbusProtocol) Decode(data []byte) (items []common.ADataItem, err 
 		log.Fatalf("[%s]===> Decode ByteToValue %s\n", mp.GetName(), err)
 	}
 	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
-	res = append(res, item)
-	return res, nil
+	return structs.Map(item), nil
 }
 
 // Verify 包校验

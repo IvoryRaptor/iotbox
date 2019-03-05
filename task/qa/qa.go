@@ -26,7 +26,12 @@ func (d *QA) StartWork(module common.IModule) (common.WorkState, error) {
 	var response common.Packet
 	for i := 0; i < d.retryCount && response == nil; i++ {
 		ch := module.Send(d, d.request[d.index])
-		if response = module.Read(ch, time.Second*5); response == nil {
+		timeout := 2000
+		// 超时时间
+		if _, ok := d.request[d.index]["timeout"]; ok {
+			timeout += d.request[d.index]["timeout"].(int)
+		}
+		if response = module.Read(ch, time.Millisecond*time.Duration(timeout)); response == nil {
 			log.Println("[QA] Timeout!")
 		}
 	}
