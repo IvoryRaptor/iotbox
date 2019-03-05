@@ -16,7 +16,7 @@ type Sql struct {
 func (s *Sql) SetPacket(packet common.Packet) (common.ICloneTask, error) {
 	buf := new(bytes.Buffer)
 	var err error
-	if err = s.tpl.Execute(buf, packet); err == nil {
+	if err = s.tpl.Execute(buf, packet["value"].(map[string]interface{})); err == nil {
 		s.sqlCommand = buf.String()
 	}
 	return s, err
