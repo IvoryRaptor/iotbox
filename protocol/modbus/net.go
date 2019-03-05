@@ -3,10 +3,7 @@ package modbus
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/fatih/structs"
 	"log"
-	"time"
 )
 
 const (
@@ -32,22 +29,15 @@ func (mp *NetModbusProtocol) GetName() string {
 
 // Encode 组包
 func (mp *NetModbusProtocol) Encode(config map[string]interface{}) (data []byte, err error) {
-	dataUnit := dataUnit{}
-	dataUnit.funcCode = mp.funcCode
-	switch mp.funcCode {
-	case 0x01, 0x02, 0x03, 0x04:
-		{
-			dataUnit.data = dataBlock(mp.registerAddress, mp.registerLen)
-		}
-	default:
-		return nil, fmt.Errorf("%s funcCode error[%x]", mp.GetName(), mp.funcCode)
+	dataUnit, err := mp.byteEncode(config)
+	if err != nil {
+		return nil, err
 	}
-	return mp.packager(&dataUnit)
+	return mp.packager(dataUnit)
 }
 
 // Decode 解包
 func (mp *NetModbusProtocol) Decode(data []byte) (res map[string]interface{}, err error) {
-	item := common.ADataItem{Name: mp.name, ValueType: mp.valueType, SampleTime: time.Now()}
 	// 5个0 5byte
 	// 长度 1byte
 	// 站地址 1byte
@@ -56,22 +46,7 @@ func (mp *NetModbusProtocol) Decode(data []byte) (res map[string]interface{}, er
 	// 数据
 	itemData := data[9:]
 	log.Printf("[%s]===> Decode data % X\n", mp.GetName(), itemData)
-	switch mp.valueType {
-	case "int", "float":
-		// 可以对字节任意排序
-		if len(itemData) < 4 {
-			itemData = append(make([]byte, 4-len(itemData)), itemData...)
-		}
-	}
-	if err := item.ByteToValue(itemData); err != nil {
-		log.Fatalf("[%s]===> Decode ByteToValue %s\n", mp.GetName(), err)
-	}
-	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
-	return common.Packet{
-		"type":   "factors",
-		"status": "ok",
-		"value":  []map[string]interface{}{structs.Map(item)},
-	}, nil
+	return mp.byteDecode(itemData)
 }
 
 // Verify 包校验

@@ -2,8 +2,11 @@ package modbus
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/fatih/structs"
 	"log"
+	"time"
 )
 
 // Protocol modbus 协议
@@ -139,6 +142,43 @@ func (mp *Protocol) Config(config map[string]interface{}) (err error) {
 		}
 	}
 	return nil
+}
+
+// Decode 解包
+func (mp *Protocol) byteDecode(data []byte) (res map[string]interface{}, err error) {
+	item := common.ADataItem{Name: mp.name, ValueType: mp.valueType, SampleTime: time.Now()}
+
+	switch mp.valueType {
+	case "int", "float":
+		// 可以对字节任意排序
+		if len(data) < 4 {
+			data = append(make([]byte, 4-len(data)), data...)
+		}
+	}
+	if err := item.ByteToValue(data); err != nil {
+		log.Fatalf("[modbus] ===> Decode ByteToValue %s\n", err)
+	}
+	log.Printf("[modbus] ===> %#v\n", item)
+	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
+	return common.Packet{
+		"type":   "factors",
+		"status": "ok",
+		"value":  []map[string]interface{}{structs.Map(item)},
+	}, nil
+}
+
+func (mp *Protocol) byteEncode(config map[string]interface{}) (res *dataUnit, err error) {
+	dataUnit := dataUnit{}
+	dataUnit.funcCode = mp.funcCode
+	switch mp.funcCode {
+	case 0x01, 0x02, 0x03, 0x04:
+		{
+			dataUnit.data = dataBlock(mp.registerAddress, mp.registerLen)
+		}
+	default:
+		return nil, fmt.Errorf("[modbus] ==> funcCode error[%x]", mp.funcCode)
+	}
+	return &dataUnit, nil
 }
 
 // dataBlock creates a sequence of uint16 data.
