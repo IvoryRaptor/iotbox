@@ -2,8 +2,11 @@ package mqtt
 
 import (
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/IvoryRaptor/iotbox/protocol/rootcloud"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"log"
+	"fmt"
+	"strings"
 )
 
 // AMqtt 上报模块
@@ -20,7 +23,7 @@ type AMqtt struct {
 	// 服务质量
 	qos byte
 	// 协议
-	protocol string
+	protocolType string
 	// 订阅主题
 	subscribe []string
 	// 推送主题
@@ -64,8 +67,8 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 			m.publish = append(m.publish, v.(string))
 		}
 	}
-	if _, ok := config["protocol"]; ok {
-		m.protocol = config["protocol"].(string)
+	if _, ok := config["protocolType"]; ok {
+		m.protocolType = config["protocolType"].(string)
 	}
 	if _, ok := config["qos"]; ok {
 		m.qos = byte(config["qos"].(int))
@@ -81,22 +84,36 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 
 // Send 发送数据
 func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s]==> Send %s\n", m.GetName(), string(packet["value"].([]byte)))
+	log.Printf("[%s]==> Send", m.GetName())
 	go func() {
+		var protocol common.IProtocol
+		var err error
+		var sendBuf []byte
 		if !m.client.IsConnected() {
-			if err := m.createConnect(); err != nil {
-				log.Fatalf("[%s]===> %s", m.GetName(), err)
-				m.Response <- nil
-				return
+			if err = m.createConnect(); err != nil {
+				goto breakout
 			}
 		}
+		protocol, err = m.createProtocol()
+		if err != nil {
+			goto breakout
+		}
+		protocol.Config(packet)
+		sendBuf, err = protocol.Encode(packet)
+		if err != nil {
+			goto breakout
+		}
 		for _, item := range m.publish {
-			token := m.client.Publish(item, m.qos, false, packet["value"])
+			token := m.client.Publish(item, m.qos, false, sendBuf)
 			token.Wait()
 			if err := token.Error(); err != nil {
 				log.Fatalf("[%s]===>top[%s] %s", m.GetName(), item, err)
 			}
 		}
+		m.Response <- nil
+		return
+	breakout:
+		log.Printf("[%s]====> %s", m.GetName(), err)
 		m.Response <- nil
 		return
 	}()
@@ -128,4 +145,16 @@ func (m *AMqtt) createConnect() error {
 		return token.Error()
 	}
 	return nil
+}
+
+// createProtocol 创建协议
+func (m *AMqtt) createProtocol() (common.IProtocol, error) {
+	var res common.IProtocol
+	switch strings.ToLower(m.protocolType) {
+	case "net":
+		res = rootcloud.Create()
+	default:
+		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)
+	}
+	return res, nil
 }

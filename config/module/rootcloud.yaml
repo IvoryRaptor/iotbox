@@ -19,4 +19,4 @@ publish:
   - Dev/Status/00000836A7K3/1/lhc20190228
 # 订阅主题
 # subscribe:
-protocol: rootcloud
+protocolType: rootcloud
