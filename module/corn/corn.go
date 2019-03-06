@@ -3,6 +3,7 @@ package corn
 import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/IvoryRaptor/iotbox/helper"
 	"github.com/robfig/cron"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -28,10 +29,11 @@ func (m *Corn) Config(kernel common.IKernel, config map[string]interface{}) erro
 			if err != nil {
 				return err
 			}
-			var config map[string]interface{}
-			if err := yaml.Unmarshal(data, &config); err != nil {
+			var tmp map[interface{}]interface{}
+			if err := yaml.Unmarshal(data, &tmp); err != nil {
 				return err
 			}
+			config := helper.CleanupMapValue(tmp).(map[string]interface{})
 			var cronTask common.ITask
 			if cronTask, err = kernel.CreateTask(config); err != nil {
 				return err
