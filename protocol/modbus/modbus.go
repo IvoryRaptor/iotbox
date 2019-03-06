@@ -1,12 +1,13 @@
-package modbus
+package main
 
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/IvoryRaptor/iotbox/protocol"
 	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/IvoryRaptor/iotbox/protocol"
 	"github.com/fatih/structs"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -35,6 +36,23 @@ type Protocol struct {
 type dataUnit struct {
 	funcCode byte
 	data     []byte
+}
+
+// Create 构造器
+func Create(config interface{}) (p protocol.IProtocol, err error) {
+	mType, ok := config.(string)
+	if !ok {
+		return nil, fmt.Errorf("type not string")
+	}
+	switch strings.ToLower(mType) {
+	case "net":
+		return CreateNetModbusProtocol(), nil
+	case "ascii":
+		return nil, fmt.Errorf("ascii not support")
+	case "rtu":
+		return CreateRTUModbusProtocol(), nil
+	}
+	return nil, fmt.Errorf("type[%s] not support", mType)
 }
 
 // Config 配置协议解析和编码的字段

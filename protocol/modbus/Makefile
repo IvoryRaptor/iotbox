@@ -1,6 +1,6 @@
 
-OBJS = modubus.go net.go rtu.go
-LIB = modubus.so
+OBJS = modbus.go net.go rtu.go crc.go
+LIB = modbus.so
 
 all:
 	go build -buildmode=plugin -o $(LIB) $(OBJS)

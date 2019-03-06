@@ -1,4 +1,4 @@
-package modbus
+package main
 
 // Table of CRC values for high–order byte
 var crcHighBytes = []byte{

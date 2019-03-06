@@ -3,7 +3,6 @@ package modbus
 import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/IvoryRaptor/iotbox/protocol/modbus"
 	"github.com/IvoryRaptor/iotbox/protocol"
 	"github.com/tarm/serial"
 	"io"
@@ -152,20 +151,6 @@ func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 	return res, nil
 }
 
-// createProtocol 创建协议
-func (m *Modbus) createProtocol() (protocol.IProtocol, error) {
-	var res protocol.IProtocol
-	switch strings.ToLower(m.protocolType) {
-	case "net":
-		res = modbus.CreateNetModbusProtocol()
-	case "rtu":
-		res = modbus.CreateRTUModbusProtocol()
-	default:
-		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)
-	}
-	return res, nil
-}
-
 // Send 发送数据
 func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	log.Printf("[%s][%s]==> Send\n", m.GetName(), m.port)
@@ -185,7 +170,7 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		defer conn.Close()
-		p, err = m.createProtocol()
+		p, err = protocol.CreateProtocol("modbus", m.protocolType)
 		if err != nil {
 			goto breakout
 		}
