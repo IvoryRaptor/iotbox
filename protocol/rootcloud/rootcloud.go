@@ -1,4 +1,4 @@
-package rootcloud
+package main
 
 import (
 	"encoding/json"
@@ -67,6 +67,6 @@ func (p *Protocol) Decode(data []byte) (res map[string]interface{}, err error) {
 }
 
 // Create 构造器
-func Create() *Protocol {
-	return &Protocol{}
+func Create(config interface{}) (protocol.IProtocol, error) {
+	return &Protocol{}, nil
 }
