@@ -7,6 +7,10 @@ PWD  := $(shell pwd)
 TMP := $(foreach n,$(DIRS),$(wildcard $(n)/*/Makefile))
 SUBDIRS := $(subst /Makefile,,$(TMP))
 
+$(shell mkdir -p ./lib/protocol)
+$(shell mkdir -p ./lib/task)
+$(shell mkdir -p ./lib/module)
+
 all: $(SUBDIRS)
 arm: $(SUBDIRS)
 mac: $(SUBDIRS)
