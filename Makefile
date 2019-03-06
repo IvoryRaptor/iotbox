@@ -16,6 +16,7 @@ all: $(SUBDIRS)
 arm: $(SUBDIRS)
 	CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc GOOS=linux GOARCH=arm  GOARM=7 go build main.go
 clean:$(SUBDIRS)
+	-rm main
 
 $(SUBDIRS):
 	@echo $@
