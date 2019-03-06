@@ -145,7 +145,7 @@ func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 		}
 		res = conn
 	default:
-		log.Fatalf("portType error[%s]\n", m.portType)
+		log.Printf("portType error[%s]\n", m.portType)
 		return nil, fmt.Errorf("portType error[%s]", m.portType)
 	}
 	return res, nil

@@ -3,11 +3,8 @@ package mqtt
 import (
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/protocol"
-	// "github.com/IvoryRaptor/iotbox/protocol/rootcloud"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"log"
-	// "fmt"
-	// "strings"
 )
 
 // AMqtt 上报模块
@@ -78,7 +75,7 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 	}
 	log.Printf("[%s]==> Config %#v\n", m.GetName(), m)
 	if err := m.createConnect(); err != nil {
-		log.Fatalf("[%s]===> %s", m.GetName(), err)
+		log.Printf("[%s]======> %s", m.GetName(), err)
 	}
 	return nil
 }
@@ -108,7 +105,7 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			token := m.client.Publish(item, m.qos, false, sendBuf)
 			token.Wait()
 			if err := token.Error(); err != nil {
-				log.Fatalf("[%s]===>top[%s] %s", m.GetName(), item, err)
+				log.Printf("[%s]===>top[%s] %s", m.GetName(), item, err)
 			}
 		}
 		m.Response <- nil
@@ -133,7 +130,7 @@ func (m *AMqtt) defaultMessageHandler(client MQTT.Client, msg MQTT.Message) {
 }
 
 // createConnect 创建mqtt连接
-func (m *AMqtt) createConnect() error {
+func (m *AMqtt) createConnect() (err error) {
 	opts := MQTT.NewClientOptions().AddBroker(m.address)
 	opts.SetClientID(m.clientID)
 	opts.SetUsername(m.user)
@@ -142,10 +139,10 @@ func (m *AMqtt) createConnect() error {
 
 	//create and start a client
 	m.client = MQTT.NewClient(opts)
-	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
-		return token.Error()
-	}
-	return nil
+	token := m.client.Connect()
+	token.Wait()
+	err = token.Error()
+	return err
 }
 
 // // createProtocol 创建协议

@@ -46,7 +46,7 @@ func (m *Sqlite) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		for _, item := range value {
 			log.Printf("[sql]==> %s", item)
 			if _, err = m.db.Exec(item); err != nil {
-				log.Fatalf("[sql]==> err[%s]", err)
+				log.Printf("[sql]==> err[%s]", err)
 			}
 		}
 		m.Response <- common.Packet{

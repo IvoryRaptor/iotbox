@@ -175,7 +175,7 @@ func (mp *Protocol) byteDecode(data []byte) (res map[string]interface{}, err err
 		}
 	}
 	if err := item.ByteToValue(data); err != nil {
-		log.Fatalf("[modbus] ===> Decode ByteToValue %s\n", err)
+		log.Printf("[modbus] ===> Decode ByteToValue %s\n", err)
 	}
 	log.Printf("[modbus] ===> %#v\n", item)
 	// 对于int和float可以进行数据转换，是否有必要对转换公式进行抽象
