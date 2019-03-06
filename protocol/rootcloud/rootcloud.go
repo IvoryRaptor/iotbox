@@ -3,12 +3,12 @@ package rootcloud
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/IvoryRaptor/iotbox/common"
+	"github.com/IvoryRaptor/iotbox/protocol"
 )
 
 // Protocol 根云上报协议
 type Protocol struct {
-	common.AProtocol
+	protocol.AProtocol
 }
 
 // GetName 获取协议名

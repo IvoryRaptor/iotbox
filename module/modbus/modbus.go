@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/protocol/modbus"
+	"github.com/IvoryRaptor/iotbox/protocol"
 	"github.com/tarm/serial"
 	"io"
 	"log"
@@ -152,8 +153,8 @@ func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 }
 
 // createProtocol 创建协议
-func (m *Modbus) createProtocol() (common.IProtocol, error) {
-	var res common.IProtocol
+func (m *Modbus) createProtocol() (protocol.IProtocol, error) {
+	var res protocol.IProtocol
 	switch strings.ToLower(m.protocolType) {
 	case "net":
 		res = modbus.CreateNetModbusProtocol()
@@ -170,7 +171,7 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	log.Printf("[%s][%s]==> Send\n", m.GetName(), m.port)
 	go func() {
 		var conn io.ReadWriteCloser
-		var protocol common.IProtocol
+		var p protocol.IProtocol
 		var err error
 		var sendBuf, recvBuf []byte
 		var value map[string]interface{}
@@ -184,12 +185,12 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		defer conn.Close()
-		protocol, err = m.createProtocol()
+		p, err = m.createProtocol()
 		if err != nil {
 			goto breakout
 		}
-		protocol.Config(packet)
-		sendBuf, err = protocol.Encode(packet)
+		p.Config(packet)
+		sendBuf, err = p.Encode(packet)
 		if err != nil {
 			goto breakout
 		}
@@ -202,14 +203,14 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 			goto breakout
 		}
 		log.Printf("[%s][%s]==> recv frame [% X]\n", m.GetName(), m.port, recvBuf)
-		if err := protocol.Verify(recvBuf); err != nil {
+		if err := p.Verify(recvBuf); err != nil {
 			goto breakout
 		}
-		value, err = protocol.Decode(recvBuf)
+		value, err = p.Decode(recvBuf)
 		if err != nil {
 			goto breakout
 		}
-		log.Printf("[%s]===> Decode value [%#v]\n", protocol.GetName(), value)
+		log.Printf("[%s]===> Decode value [%#v]\n", p.GetName(), value)
 		m.Response <- value
 		return
 	breakout:

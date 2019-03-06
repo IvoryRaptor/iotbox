@@ -3,6 +3,7 @@ package modbus
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/IvoryRaptor/iotbox/protocol"
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/fatih/structs"
 	"log"
@@ -11,7 +12,7 @@ import (
 
 // Protocol modbus 协议
 type Protocol struct {
-	common.AProtocol
+	protocol.AProtocol
 	// 数据项目名称，全局不能重复 和ADataItem Name 进行bind
 	name string
 	// 传输标识（net使用）

@@ -2,11 +2,12 @@ package mqtt
 
 import (
 	"github.com/IvoryRaptor/iotbox/common"
-	"github.com/IvoryRaptor/iotbox/protocol/rootcloud"
+	"github.com/IvoryRaptor/iotbox/protocol"
+	// "github.com/IvoryRaptor/iotbox/protocol/rootcloud"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"log"
-	"fmt"
-	"strings"
+	// "fmt"
+	// "strings"
 )
 
 // AMqtt 上报模块
@@ -86,7 +87,7 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	log.Printf("[%s]==> Send", m.GetName())
 	go func() {
-		var protocol common.IProtocol
+		var p protocol.IProtocol
 		var err error
 		var sendBuf []byte
 		if !m.client.IsConnected() {
@@ -94,12 +95,12 @@ func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 				goto breakout
 			}
 		}
-		protocol, err = m.createProtocol()
+		p, err = protocol.CreateProtocol("rootcloud", nil)
 		if err != nil {
 			goto breakout
 		}
-		protocol.Config(packet)
-		sendBuf, err = protocol.Encode(packet)
+		p.Config(packet)
+		sendBuf, err = p.Encode(packet)
 		if err != nil {
 			goto breakout
 		}
@@ -147,14 +148,14 @@ func (m *AMqtt) createConnect() error {
 	return nil
 }
 
-// createProtocol 创建协议
-func (m *AMqtt) createProtocol() (common.IProtocol, error) {
-	var res common.IProtocol
-	switch strings.ToLower(m.protocolType) {
-	case "rootcloud":
-		res = rootcloud.Create()
-	default:
-		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)
-	}
-	return res, nil
-}
+// // createProtocol 创建协议
+// func (m *AMqtt) createProtocol() (common.IProtocol, error) {
+// 	var res common.IProtocol
+// 	switch strings.ToLower(m.protocolType) {
+// 	case "rootcloud":
+// 		res = rootcloud.Create()
+// 	default:
+// 		return nil, fmt.Errorf("protocolType not support[%s]", m.protocolType)
+// 	}
+// 	return res, nil
+// }
