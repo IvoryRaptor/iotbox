@@ -12,9 +12,9 @@ $(shell mkdir -p ./lib/task)
 $(shell mkdir -p ./lib/module)
 
 all: $(SUBDIRS)
+	go build main.go
 arm: $(SUBDIRS)
-mac: $(SUBDIRS)
-linux: $(SUBDIRS)
+	CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc GOOS=linux GOARCH=arm  GOARM=7 go build main.go
 clean:$(SUBDIRS)
 
 $(SUBDIRS):
