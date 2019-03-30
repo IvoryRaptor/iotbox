@@ -25,7 +25,7 @@ Send 表示Task发送数据包给模块，并期待模块的返回
 Task必须继承自ATask，由于go语言没有构造函数，因此必须定义CreateXXX函数(该函数为动态加载做准备)
 该函数必须设置该对象的SetOtherConfig函数。
 <code>
-func (d *Demo) XXXConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
+func (d *Demo) XXXConfig(kernel common.IKernel, config map[string]interface{}) error {
 </code>
 
 Task为状态机模式，需要配置当前执行的Work函数

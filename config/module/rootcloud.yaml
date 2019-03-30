@@ -1,0 +1,20 @@
+# task的target 是和这个文件名进行bind的（不带文件名后缀）
+
+# 模块类型，和自定义模块进行绑定
+type: mqtt
+# mqtt上报地址
+address: tcp://demo.m2m.tongyi.irootech.com:1831
+# 客户端标识
+clientID: 00000836A7K3
+# 用户名
+user: 00000836A7K3
+# 密码
+password: qpBXeFM730/MJ/mMCBqe6w==
+# 服务质量
+qos: 0
+# 上报主题
+publish:
+  - Dev/Status/00000836A7K3/1/lhc20190228
+# 订阅主题
+# subscribe:
+protocolType: rootcloud

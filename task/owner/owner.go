@@ -43,9 +43,9 @@ func (m *Owner) SetOwner(owner common.IModule) *Owner {
 	return m
 }
 
-func (m *Owner) OwnerConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
+func (m *Owner) OwnerConfig(kernel common.IKernel, config map[string]interface{}) error {
 	m.SetCurrentWork(m.WorkTarget)
-	m.request = config["request"].(map[interface{}]interface{})
+	m.request = config["request"].(map[string]interface{})
 	return nil
 }
 

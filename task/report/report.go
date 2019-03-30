@@ -11,7 +11,7 @@ type Report struct {
 	packet common.Packet
 }
 
-func (d *Report) ReportConfig(kernel common.IKernel, config map[interface{}]interface{}) error {
+func (d *Report) ReportConfig(kernel common.IKernel, config map[string]interface{}) error {
 	d.SetCurrentWork(d.StartWork)
 	return nil
 }

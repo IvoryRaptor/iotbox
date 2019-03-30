@@ -1,13 +1,14 @@
 package kernel
 
 import (
-	"errors"
 	"fmt"
 	"github.com/IvoryRaptor/iotbox/common"
 	"github.com/IvoryRaptor/iotbox/module/corn"
 	"github.com/IvoryRaptor/iotbox/module/downsidemock"
 	"github.com/IvoryRaptor/iotbox/module/sqlite"
 	"github.com/IvoryRaptor/iotbox/module/upsidemock"
+	"github.com/IvoryRaptor/iotbox/module/modbus"
+	"github.com/IvoryRaptor/iotbox/module/mqtt"
 )
 
 func (k *Kernel) CreateModule(config map[string]interface{}) (common.IModule, error) {
@@ -22,9 +23,13 @@ func (k *Kernel) CreateModule(config map[string]interface{}) (common.IModule, er
 		result = corn.CreateCore()
 	case "upsidemock":
 		result = upsidemock.CreateUpside()
+	case "modbus":
+		result = modbus.Create()
+	case "mqtt":
+		result = mqtt.Create()
 	}
 	if result == nil {
-		return nil, errors.New(fmt.Sprintf("Unknown Module Type [%s]", channelType))
+		return nil, fmt.Errorf(fmt.Sprintf("Unknown Module Type [%s]", channelType))
 	}
 	if err := result.Config(k, config); err != nil {
 		return nil, err

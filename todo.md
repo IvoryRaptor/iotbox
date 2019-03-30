@@ -1,0 +1,11 @@
+- modbus serial 组包
+- 对于 int float值的转换多项式
+- 对于采集出错的处理
+- 对于module和task 超时处理
+- 对于modbus字节排序
+- 对于module和task 配置文件生成规则
+- 树根handle处理
+- 程序崩溃，重启机制
+- 日志管理
+- sqlite存储管理
+- 实时数据读取接口

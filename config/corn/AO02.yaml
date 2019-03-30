@@ -1,0 +1,22 @@
+type: QA
+target: modbus_net_tcp
+cron: "45 * * * * ? "
+retry: 3
+packet:
+-
+  name: AO02
+  transactionID: 0
+  slaveID: 1
+  address: 30001
+  len: 1
+  isWrite: false
+  valueType: int
+  # 读取超时时间，单位为ms
+  timeout: 2000
+handler:
+- type: sql
+  sql: "INSERT INTO DATA(NAME, VALUETYPE, RAWVALUE, CONVERSIONVALUE, SAMPLETIME, SAMPLESTATUS)
+  VALUES ('{{.Name}}', '{{.ValueType}}', '{{.RawValue}}', '{{.ConversionValue}}', datetime('now','localtime'), {{.SampleStatus}})"
+  target: sqlite
+- type: report
+  target: rootcloud

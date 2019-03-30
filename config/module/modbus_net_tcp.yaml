@@ -1,0 +1,14 @@
+# task的target 是和这个文件名进行bind的（不带文件名后缀）
+
+# 模块类型，和自定义模块进行绑定
+type: modbus
+# 协议类型和模块有关 对于modbus取值有（rtu、net、ascii）
+protocolType: net
+# 模块的通道类型 对于modbus取值有（serial、net）
+portType: net
+# 模块的通道地址 例如（192.168.1.234:502、/dev/tty.usbserial）
+port: 192.168.1.234:502
+# 模块的通道配置 对应serial（115200,8,n,1）对应net（udp、tcp）
+portConfig: tcp
+# 模块使用通道前延时，单位ms
+idle: 200

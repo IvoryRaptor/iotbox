@@ -16,7 +16,7 @@ const (
 
 type ITask interface {
 	cron.Job
-	Config(kernel IKernel, config map[interface{}]interface{}) error
+	Config(kernel IKernel, config map[string]interface{}) error
 	Work(channel IModule) (WorkState, error)
 }
 
@@ -37,7 +37,7 @@ type ATask struct {
 	kernel        IKernel
 	CurrentModule IModule
 	CurrentWork   func(channel IModule) (WorkState, error)
-	OtherConfig   func(kernel IKernel, config map[interface{}]interface{}) error
+	OtherConfig   func(kernel IKernel, config map[string]interface{}) error
 }
 
 func (t *ATask) Work(module IModule) (WorkState, error) {
@@ -66,7 +66,7 @@ func (t *ATask) JoinQueue(module string) *ATask {
 	return t
 }
 
-func (t *ATask) Config(kernel IKernel, config map[interface{}]interface{}) error {
+func (t *ATask) Config(kernel IKernel, config map[string]interface{}) error {
 	t.target = config["target"].(string)
 	t.kernel = kernel
 	if t.OtherConfig != nil {
@@ -80,7 +80,7 @@ func (t *ATask) SetCurrentWork(work func(channel IModule) (WorkState, error)) *A
 	return t
 }
 
-func (t *ATask) SetOtherConfig(config func(kernel IKernel, config map[interface{}]interface{}) error) *ATask {
+func (t *ATask) SetOtherConfig(config func(kernel IKernel, config map[string]interface{}) error) *ATask {
 	t.OtherConfig = config
 	return t
 }
