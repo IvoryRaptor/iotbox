@@ -156,4 +156,3 @@ func (m *AMqtt) createConnect() (err error) {
 // 	}
 // 	return res, nil
 // }
->>>>>>> origin/master
