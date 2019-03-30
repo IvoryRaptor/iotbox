@@ -5,10 +5,15 @@ import (
 	"time"
 )
 
+//模块
 type IModule interface {
+	//模块名称
 	GetName() string
+	//配置同时初始化
 	Config(kernel IKernel, config map[string]interface{}) error
+	//向模块发送数据包
 	Send(handle ITask, packet Packet) chan Packet
+	//启动模块
 	Start(this IModule)
 	GetTaskQueue() chan ITask
 	Read(ch chan Packet, timeOut time.Duration) Packet
