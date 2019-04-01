@@ -80,9 +80,9 @@ func (m *AMqtt) Config(_ common.IKernel, config map[string]interface{}) error {
 	return nil
 }
 
-// Send 发送数据
+// Tell 发送数据
 func (m *AMqtt) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s]==> Send", m.GetName())
+	log.Printf("[%s]==> Tell", m.GetName())
 	go func() {
 		var p protocol.IProtocol
 		var err error

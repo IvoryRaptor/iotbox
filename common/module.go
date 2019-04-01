@@ -48,7 +48,7 @@ func (m *AModule) Start(this IModule) {
 		for {
 			task := <-m.GetTaskQueue()
 			if state, err := task.Work(this); err != nil {
-				fmt.Printf("Task Work Error %s\n", err.Error())
+				fmt.Printf("Task receive Error %s\n", err.Error())
 			} else {
 				switch state {
 				case Complete:

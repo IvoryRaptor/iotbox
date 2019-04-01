@@ -28,7 +28,7 @@ func (m *Sqlite) Config(_ common.IKernel, config map[string]interface{}) error {
 	return err
 }
 
-// Send sqlite 执行体
+// Tell sqlite 执行体
 func (m *Sqlite) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 	go func() {
 		var err error

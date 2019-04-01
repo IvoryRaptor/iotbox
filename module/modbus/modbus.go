@@ -151,9 +151,9 @@ func (m *Modbus) createConnect() (io.ReadWriteCloser, error) {
 	return res, nil
 }
 
-// Send 发送数据
+// Tell 发送数据
 func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
-	log.Printf("[%s][%s]==> Send\n", m.GetName(), m.port)
+	log.Printf("[%s][%s]==> Tell\n", m.GetName(), m.port)
 	go func() {
 		var conn io.ReadWriteCloser
 		var p protocol.IProtocol
@@ -179,7 +179,7 @@ func (m *Modbus) Send(_ common.ITask, packet common.Packet) chan common.Packet {
 		if err != nil {
 			goto breakout
 		}
-		log.Printf("[%s][%s]==> Send frame [% X]\n", m.GetName(), m.port, sendBuf)
+		log.Printf("[%s][%s]==> Tell frame [% X]\n", m.GetName(), m.port, sendBuf)
 		// sleep sendDelay time
 		time.Sleep(time.Millisecond * time.Duration(m.sendDelay))
 		conn.Write(sendBuf)
