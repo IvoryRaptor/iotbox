@@ -15,8 +15,16 @@ func (actor *PingActor) Receive(sender akka.IActor, message akka.Message) {
 	actor.ActorSelect("pang").Tell(actor, message)
 }
 
+func (actor *PingActor) PreStart() error {
+	return nil
+}
+
 type PangActor struct {
 	akka.Actor
+}
+
+func (actor *PangActor) PreStart() error {
+	return nil
 }
 
 func (actor *PangActor) Receive(sender akka.IActor, message akka.Message) {

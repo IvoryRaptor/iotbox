@@ -10,6 +10,7 @@ type IActor interface {
 	Tell(owner IActor, message Message)
 	ActorSelect(path string) IActor
 	Ask(owner IActor, message Message, timeOut time.Duration) (bool, Message)
+	PreStart() error
 }
 
 type Actor struct {
@@ -32,6 +33,7 @@ func (actor *Actor) ActorSelect(path string) IActor {
 func (actor *Actor) start(self IActor, system *System, queue chan *block) {
 	actor.system = system
 	actor.self = self
+	self.PreStart()
 	go func() {
 		for {
 			var block = <-queue

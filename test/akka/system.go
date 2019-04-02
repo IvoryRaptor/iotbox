@@ -8,6 +8,10 @@ type System struct {
 	queues map[IActor]chan *block
 }
 
+func (system *System) PreStart() error {
+	return nil
+}
+
 func (system *System) Start() {
 	system.paths = map[string]IActor{}
 	system.queues = map[IActor]chan *block{}
@@ -26,8 +30,8 @@ func (system *System) tell(from IActor, to IActor, message Message) {
 }
 
 func (system *System) ask(from IActor, to IActor, message Message, timeOut time.Duration) (bool, Message) {
-	result := make(chan Message, 1)
-	actor := system.ActorOf(&AskActor{result: result}, "")
+	actor := &AskActor{}
+	system.ActorOf(actor, "")
 	defer system.Remove(actor)
 	system.queues[to] <- &block{
 		owner:   actor,
@@ -39,7 +43,7 @@ func (system *System) ask(from IActor, to IActor, message Message, timeOut time.
 			message: nil,
 		}
 	})
-	packet := <-result
+	packet := <-actor.result
 	return packet != nil, packet
 }
 
