@@ -1,13 +1,15 @@
 package main
 
-import "github.com/IvoryRaptor/iotbox/kernel"
+import (
+	"github.com/IvoryRaptor/iotbox/akka"
+	"github.com/IvoryRaptor/iotbox/store/sqlite"
+	"time"
+)
 
 func main() {
-	if box, err := kernel.Boot(); err == nil {
-		box.Start()
-	} else {
-		println(err.Error())
-		return
-	}
-	select {}
+	system := &akka.System{}
+	system.Start()
+	system.ActorOf(&sqlite.SqliteActor{}, "sqlite")
+	//system.Ask(sqlite,akka.Message{"":""},)
+	time.Sleep(10 * time.Second)
 }
