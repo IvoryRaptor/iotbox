@@ -1,51 +1,30 @@
 package main
 
 import (
-	"fmt"
 	"github.com/AsynkronIT/goconsole"
 	"github.com/IvoryRaptor/iotbox/akka"
-	"time"
+	"github.com/IvoryRaptor/iotbox/common"
 )
 
-type Message map[string]interface{}
-
-type TaskStart struct {
+type TestTask struct {
+	index int
 }
 
-type Task struct {
-	result map[string]interface{}
+func (t *TestTask) Init() common.Message {
+	t.index = 1
+	return common.Message{"name": "a"}
 }
 
-func (task *Task) Receive(context akka.Context) {
-	switch msg := context.Message().(type) {
-	case *akka.Started:
-		task.result = map[string]interface{}{}
-		child := akka.NewLocalActorOf("com1")
-		context.Tell(child, context.Self())
-		println("Task Started")
-	case TaskStart:
-		println("task a")
-		context.Tell(context.Sender(), Message{"name": "a"})
-	case Message:
-		switch msg["name"] {
-		case "a":
-			task.result["a"] = msg["value"]
-			context.Tell(context.Sender(), Message{"name": "b"})
-			println("task b")
-		case "b":
-			task.result["b"] = msg["value"]
-			context.Tell(context.Sender(), Message{"name": "c"})
-			println("task c")
-		case "c":
-			task.result["c"] = msg["value"]
-			fmt.Printf("a = %s\n b = %s\n c = %s\n",
-				task.result["a"],
-				task.result["b"],
-				task.result["c"],
-			)
-			context.Tell(context.Sender(), nil)
-		}
+func (t *TestTask) GetNext(msg common.Message) common.Message {
+	var result common.Message
+	switch t.index {
+	case 1:
+		result = common.Message{"name": "b"}
+	case 2:
+		result = common.Message{"name": "c"}
 	}
+	t.index++
+	return result
 }
 
 type Protocol interface {
@@ -57,42 +36,13 @@ type Port struct {
 
 func (module *Port) Receive(context akka.Context) {
 	switch msg := context.Message().(type) {
-	case Message:
-		response := Message{
+	case common.Message:
+		println(msg["name"].(string))
+		response := common.Message{
 			"name":  msg["name"].(string),
 			"value": "1",
 		}
 		context.Tell(context.Sender(), response)
-	}
-}
-
-type Module struct {
-	Port *akka.ActorRef
-}
-
-func (module *Module) Receive(context akka.Context) {
-	switch task := context.Message().(type) {
-	case *akka.ActorRef:
-		var request Message = nil
-		var response interface{} = TaskStart{}
-		var future *akka.Future
-		for ok := true; ok; ok = request != nil {
-			future = context.Ask(task, response, 1*time.Second)
-			if result, err := future.Result(); err != nil {
-				println(err.Error())
-				request = nil
-			} else if result != nil {
-				request = result.(Message)
-				future = context.Ask(module.Port, request, 1*time.Second)
-				if result, err := future.Result(); err != nil {
-					println(err.Error())
-				} else {
-					response = result.(Message)
-				}
-			} else {
-				request = nil
-			}
-		}
 	}
 }
 
@@ -101,11 +51,12 @@ func main() {
 	port := rootContext.ActorOf(akka.PropsFromProducer(func() akka.Actor {
 		return &Port{}
 	}))
-	rootContext.ActorOfNamed(akka.PropsFromProducer(func() akka.Actor {
-		return &Module{Port: port}
-	}), "com1")
-	rootContext.ActorOf(akka.PropsFromProducer(func() akka.Actor {
-		return &Task{}
+
+	tmp := rootContext.ActorOf(akka.PropsFromProducer(func() akka.Actor {
+		return &common.Module{Port: port}
 	}))
+
+	rootContext.Tell(tmp, &TestTask{})
+
 	console.ReadLine()
 }
