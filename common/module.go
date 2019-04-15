@@ -37,3 +37,9 @@ func (module *Module) Receive(context akka.Context) {
 		}
 	}
 }
+
+func CreatePort(port *Port, name string) (*akka.ActorRef, error) {
+	return akka.EmptyRootContext.ActorOfNamed(akka.PropsFromProducer(func() akka.Actor {
+		return &Module{Port: port}
+	}), name)
+}

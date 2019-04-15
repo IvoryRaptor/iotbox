@@ -8,15 +8,13 @@ import (
 )
 
 type TestTask struct {
-	index   int
-	context *akka.RootContext
+	index int
 }
 
-func (t *TestTask) Init(context *akka.RootContext) {
+func (t *TestTask) Init() {
 	t.index = 0
-	t.context = context
 	m := akka.NewLocalActorOf("com1")
-	context.Tell(m, t)
+	akka.EmptyRootContext.Tell(m, t)
 	return
 }
 
@@ -50,13 +48,8 @@ func (t *TestTask) GetNext(response *common.Response) *common.Request {
 }
 
 func main() {
-	rootContext := akka.EmptyRootContext
-
-	rootContext.ActorOfNamed(akka.PropsFromProducer(func() akka.Actor {
-		return &common.Module{Port: &common.Port{}}
-	}), "com1")
-
-	var task = &TestTask{}
-	task.Init(rootContext)
+	common.CreatePort(&common.Port{}, "com1")
+	test := TestTask{}
+	test.Init()
 	console.ReadLine()
 }
