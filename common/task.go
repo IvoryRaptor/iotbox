@@ -8,8 +8,9 @@ import (
 type Message map[string]interface{}
 
 type Request struct {
-	Wait time.Duration
-	Body Message
+	Wait  time.Duration
+	Body  Message
+	Retry int
 }
 
 type ResponseState int

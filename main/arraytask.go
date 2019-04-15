@@ -6,30 +6,24 @@ import (
 )
 
 type ArrayTask struct {
-	index      int
-	Messages   []common.Message
-	Wait       time.Duration
-	retryCount int
-	Retry      int
+	index    int
+	Messages []common.Message
+	Wait     time.Duration
 }
 
 func (t *ArrayTask) Init(task *common.TaskRef) {
 	t.index = 0
-	t.retryCount = 0
 	return
 }
 
 func (t *ArrayTask) Receive(task *common.TaskRef, response *common.Response) {
 	switch response.State {
 	case common.ResponseTimeout:
-		t.retryCount++
-		if t.retryCount >= t.Retry {
-			t.index++
-		}
+
 	default:
-		t.retryCount = 0
 		t.index++
 	}
+	t.index++
 }
 
 func (t *ArrayTask) GetRequest(task *common.TaskRef) *common.Request {
@@ -37,7 +31,8 @@ func (t *ArrayTask) GetRequest(task *common.TaskRef) *common.Request {
 		return nil
 	}
 	return &common.Request{
-		Wait: t.Wait,
-		Body: t.Messages[t.index],
+		Wait:  t.Wait,
+		Body:  t.Messages[t.index],
+		Retry: 3,
 	}
 }

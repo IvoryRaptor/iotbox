@@ -18,16 +18,21 @@ func (module *Module) Receive(context akka.Context) {
 	case *TaskRef:
 		request := task.GetRequest()
 		for request != nil {
+			retry := 0
 			future := context.Ask(module.portRef, request.Body, request.Wait)
-			if result, err := future.Result(); err != nil {
-				task.Receive(&Response{
-					State: ResponseTimeout,
-					Body:  nil,
-				})
-			} else {
+			for ; retry < request.Retry; retry++ {
+				if result, err := future.Result(); err == nil {
+					task.Receive(&Response{
+						State: ResponseTimeout,
+						Body:  result.(Message),
+					})
+					break
+				}
+			}
+			if retry >= request.Retry {
 				task.Receive(&Response{
 					State: ResponseResult,
-					Body:  result.(Message),
+					Body:  nil,
 				})
 			}
 			request = task.GetRequest()
