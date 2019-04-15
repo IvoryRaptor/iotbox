@@ -48,6 +48,7 @@ func (t *TestTask) GetRequest(task *common.TaskRef) *common.Request {
 }
 
 func main() {
+	common.CreatePort(&common.Port{}, "net")
 	common.CreatePort(&common.Port{}, "com1")
 	common.JoinTask("com1", &TestTask{})
 	common.JoinTask("com1", &TestTask{})
@@ -60,6 +61,10 @@ func main() {
 		},
 		Wait: 1 * time.Second,
 	})
-
+	common.JoinTask("com1", &ReadTask{
+		Owner:   "net",
+		Message: common.Message{"name": "g"},
+		Wait:    1 * time.Second,
+	})
 	console.ReadLine()
 }
