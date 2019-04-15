@@ -12,7 +12,6 @@ type TestTask struct {
 
 func (t *TestTask) Init(task *common.TaskRef) {
 	t.index = 0
-	task.JoinModule("com1")
 	return
 }
 
@@ -50,6 +49,6 @@ func (t *TestTask) GetRequest(task *common.TaskRef) *common.Request {
 
 func main() {
 	common.CreatePort(&common.Port{}, "com1")
-	common.CreateTask(&TestTask{})
+	common.JoinTask("com1", &TestTask{})
 	console.ReadLine()
 }

@@ -41,7 +41,7 @@ func CreatePort(port *Port, name string) (*akka.ActorRef, error) {
 	}), name)
 }
 
-func CreateTask(task ITask) *TaskRef {
+func JoinTask(module string, task ITask) *TaskRef {
 	result := &TaskRef{
 		task:            task,
 		data:            map[string]interface{}{},
@@ -49,5 +49,6 @@ func CreateTask(task ITask) *TaskRef {
 		func_getrequest: task.GetRequest,
 	}
 	task.Init(result)
+	result.JoinModule(module)
 	return result
 }
