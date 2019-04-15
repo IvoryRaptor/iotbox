@@ -21,12 +21,12 @@ func (module *Module) Receive(context akka.Context) {
 			future := context.Ask(module.portRef, request.Body, request.Wait)
 			if result, err := future.Result(); err != nil {
 				task.Receive(&Response{
-					State: Timeout,
+					State: ResponseTimeout,
 					Body:  nil,
 				})
 			} else {
 				task.Receive(&Response{
-					State: Result,
+					State: ResponseResult,
 					Body:  result.(Message),
 				})
 			}

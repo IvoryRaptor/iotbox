@@ -12,16 +12,15 @@ type Request struct {
 	Body Message
 }
 
-type State int
+type ResponseState int
 
 const (
-	Initialize State = iota // value --> 0
-	Result                  // value --> 1
-	Timeout                 // value --> 2
+	ResponseResult  ResponseState = iota // value --> 0
+	ResponseTimeout                      // value --> 1
 )
 
 type Response struct {
-	State State
+	State ResponseState
 	Body  Message
 }
 
