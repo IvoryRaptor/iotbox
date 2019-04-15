@@ -17,7 +17,7 @@ func (t *TestTask) Init(task *common.TaskRef) {
 
 func (t *TestTask) Receive(task *common.TaskRef, response *common.Response) {
 	switch response.State {
-	case common.Timeout:
+	case common.ResponseTimeout:
 
 	default:
 	}
