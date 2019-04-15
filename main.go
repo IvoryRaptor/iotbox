@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/AsynkronIT/goconsole"
-	"github.com/IvoryRaptor/iotbox/akka"
 	"github.com/IvoryRaptor/iotbox/common"
 	"time"
 )
@@ -11,14 +10,13 @@ type TestTask struct {
 	index int
 }
 
-func (t *TestTask) Init() {
+func (t *TestTask) Init(task *common.TaskRef) {
 	t.index = 0
-	m := akka.NewLocalActorOf("com1")
-	akka.EmptyRootContext.Tell(m, t)
+	task.JoinModule("com1")
 	return
 }
 
-func (t *TestTask) Receive(response *common.Response) {
+func (t *TestTask) Receive(task *common.TaskRef, response *common.Response) {
 	switch response.State {
 	case common.Timeout:
 
@@ -27,7 +25,7 @@ func (t *TestTask) Receive(response *common.Response) {
 	t.index++
 }
 
-func (t *TestTask) GetNext() *common.Request {
+func (t *TestTask) GetRequest(task *common.TaskRef) *common.Request {
 	switch t.index {
 	case 0:
 		return &common.Request{
@@ -52,7 +50,6 @@ func (t *TestTask) GetNext() *common.Request {
 
 func main() {
 	common.CreatePort(&common.Port{}, "com1")
-	test := TestTask{}
-	test.Init()
+	common.CreateTask(&TestTask{})
 	console.ReadLine()
 }
