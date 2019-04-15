@@ -4,24 +4,35 @@ import (
 	"github.com/AsynkronIT/goconsole"
 	"github.com/IvoryRaptor/iotbox/akka"
 	"github.com/IvoryRaptor/iotbox/common"
+	"time"
 )
 
 type TestTask struct {
 	index int
 }
 
-func (t *TestTask) Init() common.Message {
+func (t *TestTask) Init() *common.Request {
 	t.index = 1
-	return common.Message{"name": "a"}
+	return &common.Request{
+		Wait: 1 * time.Second,
+		Msg:  common.Message{"name": "a"},
+	}
 }
 
-func (t *TestTask) GetNext(msg common.Message) common.Message {
-	var result common.Message
+func (t *TestTask) GetNext(msg common.Message) *common.Request {
+	var result *common.Request
 	switch t.index {
 	case 1:
-		result = common.Message{"name": "b"}
+		result = &common.Request{
+			Wait: 1 * time.Second,
+			Msg:  common.Message{"name": "b"},
+		}
+
 	case 2:
-		result = common.Message{"name": "c"}
+		result = &common.Request{
+			Wait: 1 * time.Second,
+			Msg:  common.Message{"name": "c"},
+		}
 	}
 	t.index++
 	return result
