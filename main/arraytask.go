@@ -21,7 +21,7 @@ func (t *ArrayTask) Receive(task *common.TaskRef, response *common.Response) {
 	case common.ResponseTimeout:
 
 	default:
-		t.index++
+		task.Set(response.Body["name"].(string), response.Body["value"])
 	}
 	t.index++
 }

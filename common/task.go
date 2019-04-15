@@ -38,6 +38,18 @@ type TaskRef struct {
 	func_getrequest func(task *TaskRef) *Request
 }
 
+func (t *TaskRef) Set(name string, value interface{}) {
+	t.data[name] = value
+}
+
+func (t *TaskRef) Get(name string) interface{} {
+	return t.data[name]
+}
+
+func (t *TaskRef) GetData() map[string]interface{} {
+	return t.data
+}
+
 func (t *TaskRef) Receive(response *Response) {
 	t.func_receive(t, response)
 }
@@ -51,6 +63,7 @@ func (t *TaskRef) Become(module string, receive func(task *TaskRef, response *Re
 func (t *TaskRef) GetRequest() *Request {
 	return t.func_getrequest(t)
 }
+
 func (t *TaskRef) JoinModule(name string) {
 	m := akka.NewLocalActorOf(name)
 	akka.EmptyRootContext.Tell(m, t)
