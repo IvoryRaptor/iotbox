@@ -18,33 +18,36 @@ func (t *TestTask) Init() {
 	return
 }
 
-func (t *TestTask) GetNext(response *common.Response) *common.Request {
-	var result *common.Request
+func (t *TestTask) Receive(response *common.Response) {
 	switch response.State {
 	case common.Timeout:
 
 	default:
-		switch t.index {
-		case 0:
-			result = &common.Request{
-				Wait: 1 * time.Second,
-				Body: common.Message{"name": "a"},
-			}
-		case 1:
-			result = &common.Request{
-				Wait: 1 * time.Second,
-				Body: common.Message{"name": "b"},
-			}
-
-		case 2:
-			result = &common.Request{
-				Wait: 1 * time.Second,
-				Body: common.Message{"name": "c"},
-			}
-		}
-		t.index++
 	}
-	return result
+	t.index++
+}
+
+func (t *TestTask) GetNext() *common.Request {
+	switch t.index {
+	case 0:
+		return &common.Request{
+			Wait: 1 * time.Second,
+			Body: common.Message{"name": "a"},
+		}
+	case 1:
+		return &common.Request{
+			Wait: 1 * time.Second,
+			Body: common.Message{"name": "b"},
+		}
+
+	case 2:
+		return &common.Request{
+			Wait: 1 * time.Second,
+			Body: common.Message{"name": "c"},
+		}
+	default:
+		return nil
+	}
 }
 
 func main() {

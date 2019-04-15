@@ -16,24 +16,21 @@ func (module *Module) Receive(context akka.Context) {
 			return module.Port
 		}))
 	case ITask:
-		var request *Request = nil
-		var response Message
-		var future *akka.Future
-		request = task.GetNext(&Response{State: Initialize})
+		request := task.GetNext()
 		for request != nil {
-			future = context.Ask(module.portRef, request.Body, request.Wait)
+			future := context.Ask(module.portRef, request.Body, request.Wait)
 			if result, err := future.Result(); err != nil {
-				request = task.GetNext(&Response{
+				task.Receive(&Response{
 					State: Timeout,
 					Body:  nil,
 				})
 			} else {
-				response = result.(Message)
-				request = task.GetNext(&Response{
+				task.Receive(&Response{
 					State: Result,
-					Body:  response,
+					Body:  result.(Message),
 				})
 			}
+			request = task.GetNext()
 		}
 	}
 }

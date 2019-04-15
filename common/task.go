@@ -23,5 +23,6 @@ type Response struct {
 }
 
 type ITask interface {
-	GetNext(response *Response) *Request
+	Receive(response *Response)
+	GetNext() *Request
 }
