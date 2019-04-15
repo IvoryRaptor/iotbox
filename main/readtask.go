@@ -17,26 +17,24 @@ func (t *ReadTask) Init(task *common.TaskRef) {
 	t.send = false
 }
 
-func (t *ReadTask) OwnerReceive(task *common.TaskRef, response *common.Response) {
-	t.send = true
-	println("result")
-}
-
-func (t *ReadTask) OwnerGetRequest(task *common.TaskRef) *common.Request {
-	if t.send {
-		return nil
-	}
-	println("OwnerGetRequest")
-	return &common.Request{
-		Wait:  t.Wait,
-		Body:  t.result.Body,
-		Retry: 3,
-	}
-}
-
 func (t *ReadTask) Receive(task *common.TaskRef, response *common.Response) {
 	t.result = response
-	task.Become(t.Owner, t.OwnerReceive, t.OwnerGetRequest)
+	task.Become(t.Owner,
+		func(task *common.TaskRef, response *common.Response) {
+			t.send = true
+			println("result")
+		},
+		func(task *common.TaskRef) *common.Request {
+			if t.send {
+				return nil
+			}
+			return &common.Request{
+				Wait:  t.Wait,
+				Body:  t.result.Body,
+				Retry: 3,
+			}
+		},
+	)
 }
 
 func (t *ReadTask) GetRequest(task *common.TaskRef) *common.Request {
