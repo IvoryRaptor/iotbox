@@ -1,78 +1,25 @@
 package akka
 
-import (
-	"fmt"
-	"log"
-	"time"
-)
+// The Producer type is a function that creates a new actor
+type Producer func() Actor
 
-type IActor interface {
-	Receive(sender IActor, message Message) error
-	Tell(owner IActor, message Message)
-	ActorSelect(path string) IActor
-	Ask(owner IActor, message Message, timeOut time.Duration) (bool, Message)
-	PreStart() error
-	GetPath() string
-	init(actor IActor, system *System, name string)
-	start(queue chan *block) error
+// Actor is the interface that defines the Receive method.
+//
+// Receive is sent messages to be processed from the mailbox associated with the instance of the actor
+type Actor interface {
+	Receive(c Context)
 }
 
-type Actor struct {
-	system  *System
-	self    IActor
-	path    string
-	receive func(sender IActor, message Message) error
+// The ActorFunc type is an adapter to allow the use of ordinary functions as actors to process messages
+type ActorFunc func(c Context)
+
+// Receive calls f(c)
+func (f ActorFunc) Receive(c Context) {
+	f(c)
 }
 
-func (actor *Actor) Info(format string, v ...interface{}) {
-	log.Printf("[%s]====> %s", actor.GetPath(), fmt.Sprintf(format, v))
-}
+type ReceiverFunc func(c ReceiverContext, envelope *MessageEnvelope)
 
-func (actor *Actor) Error(err error) {
-	log.Printf("[%s] Error %s", actor.GetPath(), err.Error())
-}
+type SenderFunc func(c SenderContext, target *ActorRef, envelope *MessageEnvelope)
 
-func (actor *Actor) Warn(format string, v ...interface{}) {
-	log.Printf("[%s] Warn %s", actor.GetPath(), fmt.Sprintf(format, v))
-}
-
-func (actor *Actor) GetPath() string {
-	return actor.path
-}
-func (actor *Actor) Tell(owner IActor, message Message) {
-	actor.system.tell(owner, actor.self, message)
-}
-
-func (actor *Actor) Ask(owner IActor, message Message, timeOut time.Duration) (bool, Message) {
-	return actor.system.ask(owner, actor.self, message, timeOut)
-}
-
-func (actor *Actor) Become(newReceive func(sender IActor, message Message) error) {
-	actor.receive = newReceive
-}
-
-func (actor *Actor) ActorSelect(path string) IActor {
-	return actor.system.paths[path]
-}
-
-func (actor *Actor) init(self IActor, system *System, path string) {
-	actor.system = system
-	actor.self = self
-	actor.path = path
-	actor.receive = self.Receive
-}
-
-func (actor *Actor) start(queue chan *block) error {
-	if err := actor.self.PreStart(); err != nil {
-		return err
-	}
-	go func() {
-		for {
-			var block = <-queue
-			if err := actor.receive(block.owner, block.message); err != nil {
-				log.Printf("[%s] Error %s", actor.GetPath(), err.Error())
-			}
-		}
-	}()
-	return nil
-}
+type ContextDecoratorFunc func(ctx Context) Context
