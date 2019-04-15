@@ -50,5 +50,14 @@ func (t *TestTask) GetRequest(task *common.TaskRef) *common.Request {
 func main() {
 	common.CreatePort(&common.Port{}, "com1")
 	common.JoinTask("com1", &TestTask{})
+	common.JoinTask("com1", &ArrayTask{
+		Messages: []common.Message{
+			{"name": "d"},
+			{"name": "e"},
+			{"name": "f"},
+		},
+		Wait: 1 * time.Second,
+	})
+
 	console.ReadLine()
 }
