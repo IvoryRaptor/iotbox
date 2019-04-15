@@ -14,14 +14,17 @@ func (module *Module) Receive(context akka.Context) {
 		var request *Request = nil
 		var response Message
 		var future *akka.Future
-		request = task.Init()
+		request = task.GetNext(&Response{State: Initialize})
 		for request != nil {
-			future = context.Ask(module.Port, request.Msg, request.Wait)
+			future = context.Ask(module.Port, request.Body, request.Wait)
 			if result, err := future.Result(); err != nil {
 				println(err.Error())
 			} else {
 				response = result.(Message)
-				request = task.GetNext(response)
+				request = task.GetNext(&Response{
+					State: Result,
+					Body:  response,
+				})
 			}
 		}
 	}

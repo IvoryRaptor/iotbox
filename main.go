@@ -11,30 +11,37 @@ type TestTask struct {
 	index int
 }
 
-func (t *TestTask) Init() *common.Request {
-	t.index = 1
-	return &common.Request{
-		Wait: 1 * time.Second,
-		Msg:  common.Message{"name": "a"},
-	}
+func (t *TestTask) Init() {
+	t.index = 0
+	return
 }
 
-func (t *TestTask) GetNext(msg common.Message) *common.Request {
+func (t *TestTask) GetNext(response *common.Response) *common.Request {
 	var result *common.Request
-	switch t.index {
-	case 1:
-		result = &common.Request{
-			Wait: 1 * time.Second,
-			Msg:  common.Message{"name": "b"},
-		}
+	switch response.State {
+	case common.Timeout:
 
-	case 2:
-		result = &common.Request{
-			Wait: 1 * time.Second,
-			Msg:  common.Message{"name": "c"},
+	default:
+		switch t.index {
+		case 0:
+			result = &common.Request{
+				Wait: 1 * time.Second,
+				Body: common.Message{"name": "a"},
+			}
+		case 1:
+			result = &common.Request{
+				Wait: 1 * time.Second,
+				Body: common.Message{"name": "b"},
+			}
+
+		case 2:
+			result = &common.Request{
+				Wait: 1 * time.Second,
+				Body: common.Message{"name": "c"},
+			}
 		}
+		t.index++
 	}
-	t.index++
 	return result
 }
 
@@ -45,7 +52,7 @@ type Port struct {
 	protocol Protocol
 }
 
-func (module *Port) Receive(context akka.Context) {
+func (port *Port) Receive(context akka.Context) {
 	switch msg := context.Message().(type) {
 	case common.Message:
 		println(msg["name"].(string))
