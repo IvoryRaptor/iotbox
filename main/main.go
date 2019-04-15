@@ -56,7 +56,8 @@ func main() {
 			{"name": "e"},
 			{"name": "f"},
 		},
-		Wait: 1 * time.Second,
+		Wait:  1 * time.Second,
+		Retry: 3,
 	})
 
 	console.ReadLine()
