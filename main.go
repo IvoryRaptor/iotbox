@@ -8,11 +8,15 @@ import (
 )
 
 type TestTask struct {
-	index int
+	index   int
+	context *akka.RootContext
 }
 
-func (t *TestTask) Init() {
+func (t *TestTask) Init(context *akka.RootContext) {
 	t.index = 0
+	t.context = context
+	m := akka.NewLocalActorOf("com1")
+	context.Tell(m, t)
 	return
 }
 
@@ -45,36 +49,14 @@ func (t *TestTask) GetNext(response *common.Response) *common.Request {
 	return result
 }
 
-type Protocol interface {
-}
-
-type Port struct {
-	protocol Protocol
-}
-
-func (port *Port) Receive(context akka.Context) {
-	switch msg := context.Message().(type) {
-	case common.Message:
-		println(msg["name"].(string))
-		response := common.Message{
-			"name":  msg["name"].(string),
-			"value": "1",
-		}
-		context.Tell(context.Sender(), response)
-	}
-}
-
 func main() {
 	rootContext := akka.EmptyRootContext
-	port := rootContext.ActorOf(akka.PropsFromProducer(func() akka.Actor {
-		return &Port{}
-	}))
 
-	tmp := rootContext.ActorOf(akka.PropsFromProducer(func() akka.Actor {
-		return &common.Module{Port: port}
-	}))
+	rootContext.ActorOfNamed(akka.PropsFromProducer(func() akka.Actor {
+		return &common.Module{Port: &common.Port{}}
+	}), "com1")
 
-	rootContext.Tell(tmp, &TestTask{})
-
+	var task = &TestTask{}
+	task.Init(rootContext)
 	console.ReadLine()
 }
