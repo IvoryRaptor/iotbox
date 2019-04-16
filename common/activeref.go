@@ -1,14 +1,23 @@
 package common
 
-import "github.com/IvoryRaptor/iotbox/akka"
+import (
+	"github.com/IvoryRaptor/iotbox/akka"
+	"time"
+)
 
 type ActiveRef struct {
 	Port Port
+	Wait time.Duration
+	Work func(message Message)
+}
+
+type Idle struct {
 }
 
 func (a *ActiveRef) Receive(context akka.Context) {
 	switch task := context.Message().(type) {
 	case *akka.Started:
+		a.Port.Open()
 	case *TaskRef:
 		request := task.GetRequest()
 		for request != nil {
@@ -31,5 +40,13 @@ func (a *ActiveRef) Receive(context akka.Context) {
 			}
 			request = task.GetRequest()
 		}
+	case *Idle:
+		if result, err := a.Port.Read(a.Wait); err != nil {
+
+		} else if result != nil {
+			println("work")
+			a.Work(result)
+		}
+		context.Tell(context.Self(), context.Message())
 	}
 }
