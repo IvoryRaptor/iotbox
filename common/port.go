@@ -8,7 +8,7 @@ type Protocol interface {
 }
 
 type Port interface {
-	Open() error
+	Open(map[string]interface{}) error
 	Read(wait time.Duration) (msg Message, err error)
 	Write(message Message) error
 	Close() error

@@ -1,7 +1,10 @@
 package common
 
 import (
+	"fmt"
 	"github.com/IvoryRaptor/iotbox/akka"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"time"
 )
 
@@ -17,7 +20,16 @@ type Idle struct {
 func (a *ActiveRef) Receive(context akka.Context) {
 	switch task := context.Message().(type) {
 	case *akka.Started:
-		a.Port.Open()
+		println(context.Self().Id)
+		data, err := ioutil.ReadFile(fmt.Sprintf("./config/port/%s", context.Self().Id))
+		if err != nil {
+			data = []byte{}
+		}
+		var config map[string]interface{}
+		if err := yaml.Unmarshal(data, &config); err != nil {
+
+		}
+		a.Port.Open(config)
 	case *TaskRef:
 		request := task.GetRequest()
 		for request != nil {

@@ -1,6 +1,11 @@
 package common
 
-import "github.com/IvoryRaptor/iotbox/akka"
+import (
+	"fmt"
+	"github.com/IvoryRaptor/iotbox/akka"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+)
 
 type PassiveRef struct {
 	Port Port
@@ -9,7 +14,16 @@ type PassiveRef struct {
 func (p *PassiveRef) Receive(context akka.Context) {
 	switch task := context.Message().(type) {
 	case *akka.Started:
-		p.Port.Open()
+		println(context.Self().Id)
+		data, err := ioutil.ReadFile(fmt.Sprintf("./config/port/%s", context.Self().Id))
+		if err != nil {
+			data = []byte{}
+		}
+		var config map[string]interface{}
+		if err := yaml.Unmarshal(data, &config); err != nil {
+
+		}
+		p.Port.Open(config)
 	case *TaskRef:
 		request := task.GetRequest()
 		for request != nil {

@@ -11,7 +11,7 @@ type MockActivePort struct {
 	mutex *sync.Mutex
 }
 
-func (m *MockActivePort) Open() error {
+func (m *MockActivePort) Open(config map[string]interface{}) error {
 	m.mutex = new(sync.Mutex)
 	return nil
 }

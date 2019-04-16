@@ -9,7 +9,7 @@ type MockPassivePort struct {
 	name string
 }
 
-func (m *MockPassivePort) Open() error {
+func (m *MockPassivePort) Open(config map[string]interface{}) error {
 	return nil
 }
 
