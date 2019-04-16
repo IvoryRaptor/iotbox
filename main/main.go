@@ -28,8 +28,30 @@ func (m *MockPassivePort) Close() error {
 	return nil
 }
 
+type MockActivePort struct {
+	msg common.Message
+}
+
+func (m *MockActivePort) Write(message common.Message) error {
+	return nil
+}
+
+func (m *MockActivePort) Read(wait time.Duration) (msg common.Message, err error) {
+	result := m.msg
+	m.msg = nil
+	return result, nil
+}
+
+func (m *MockActivePort) Close() error {
+	return nil
+}
+
+func (m *MockActivePort) SetMessage(msg common.Message) {
+	m.msg = msg
+}
+
 func main() {
-	common.CreateActivePort("net", &MockPassivePort{})
+	common.CreateActivePort("net", &MockActivePort{})
 	common.CreatePassivePort("com1", &MockPassivePort{})
 
 	common.AddTask("com1", &TestTask{})
@@ -43,6 +65,7 @@ func main() {
 		},
 		Wait: 1 * time.Second,
 	})
+
 	common.AddTask("com1", &ReadTask{
 		Owner:   "net",
 		Message: common.Message{"name": "g"},
