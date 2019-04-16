@@ -1,4 +1,4 @@
-package main
+package task
 
 import (
 	"github.com/IvoryRaptor/iotbox/common"
