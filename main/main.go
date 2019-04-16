@@ -73,7 +73,6 @@ func (m *MockActivePort) SetMessage(msg common.Message) {
 
 func main() {
 	active := &MockActivePort{}
-	active.Open()
 
 	common.CreateActivePort("net", active, 1*time.Second, func(message common.Message) {
 		common.AddTask("com1", &ReadTask{

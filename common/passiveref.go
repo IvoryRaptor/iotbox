@@ -9,6 +9,7 @@ type PassiveRef struct {
 func (p *PassiveRef) Receive(context akka.Context) {
 	switch task := context.Message().(type) {
 	case *akka.Started:
+		p.Port.Open()
 	case *TaskRef:
 		request := task.GetRequest()
 		for request != nil {
