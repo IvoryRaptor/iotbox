@@ -1,22 +1,14 @@
 package common
 
-import "github.com/IvoryRaptor/iotbox/akka"
+import "time"
 
 type Protocol interface {
+	Parse(data []byte) Message
+	Packet(message Message) []byte
 }
 
-type Port struct {
-	protocol Protocol
-}
-
-func (port *Port) Receive(context akka.Context) {
-	switch msg := context.Message().(type) {
-	case Message:
-		println(msg["name"].(string))
-		response := Message{
-			"name":  msg["name"].(string),
-			"value": "1",
-		}
-		context.Tell(context.Sender(), response)
-	}
+type Port interface {
+	Read(wait time.Duration) (msg Message, err error)
+	Write(message Message) error
+	Close() error
 }

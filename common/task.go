@@ -57,14 +57,14 @@ func (t *TaskRef) Receive(response *Response) {
 func (t *TaskRef) Become(module string, receive func(task *TaskRef, response *Response), getrequest func(task *TaskRef) *Request) {
 	t.func_receive = receive
 	t.func_getrequest = getrequest
-	t.JoinModule(module)
+	t.JoinProcessor(module)
 }
 
 func (t *TaskRef) GetRequest() *Request {
 	return t.func_getrequest(t)
 }
 
-func (t *TaskRef) JoinModule(name string) {
+func (t *TaskRef) JoinProcessor(name string) {
 	m := akka.NewLocalActorOf(name)
 	akka.EmptyRootContext.Tell(m, t)
 }

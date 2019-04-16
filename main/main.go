@@ -6,54 +6,36 @@ import (
 	"time"
 )
 
-type TestTask struct {
-	index int
+type MockPassivePort struct {
+	name string
 }
 
-func (t *TestTask) Init(task *common.TaskRef) {
-	t.index = 0
-	return
+func (m *MockPassivePort) Write(message common.Message) error {
+	m.name = message["name"].(string)
+	println("write:" + m.name)
+	return nil
 }
 
-func (t *TestTask) Receive(task *common.TaskRef, response *common.Response) {
-	switch response.State {
-	case common.ResponseTimeout:
-
-	default:
-	}
-	t.index++
+func (m *MockPassivePort) Read(wait time.Duration) (msg common.Message, err error) {
+	println("read:" + m.name)
+	return common.Message{
+		"name":  m.name,
+		"value": "1",
+	}, nil
 }
 
-func (t *TestTask) GetRequest(task *common.TaskRef) *common.Request {
-	switch t.index {
-	case 0:
-		return &common.Request{
-			Wait: 1 * time.Second,
-			Body: common.Message{"name": "a"},
-		}
-	case 1:
-		return &common.Request{
-			Wait: 1 * time.Second,
-			Body: common.Message{"name": "b"},
-		}
-
-	case 2:
-		return &common.Request{
-			Wait: 1 * time.Second,
-			Body: common.Message{"name": "c"},
-		}
-	default:
-		return nil
-	}
+func (m *MockPassivePort) Close() error {
+	return nil
 }
 
 func main() {
-	common.CreatePort(&common.Port{}, "net")
-	common.CreatePort(&common.Port{}, "com1")
-	common.JoinTask("com1", &TestTask{})
-	common.JoinTask("com1", &TestTask{})
+	common.CreateActivePort("net", &MockPassivePort{})
+	common.CreatePassivePort("com1", &MockPassivePort{})
 
-	common.JoinTask("com1", &ArrayTask{
+	common.AddTask("com1", &TestTask{})
+	common.AddTask("com1", &TestTask{})
+
+	common.AddTask("com1", &ArrayTask{
 		Messages: []common.Message{
 			{"name": "d"},
 			{"name": "e"},
@@ -61,7 +43,7 @@ func main() {
 		},
 		Wait: 1 * time.Second,
 	})
-	common.JoinTask("com1", &ReadTask{
+	common.AddTask("com1", &ReadTask{
 		Owner:   "net",
 		Message: common.Message{"name": "g"},
 		Wait:    1 * time.Second,
