@@ -11,6 +11,36 @@ type Window struct {
 	packet []interface{}
 }
 
+func (w *Window) Map(work func(msg []interface{}) interface{}) *Transform {
+	result := &Transform{
+		work: func(msg interface{}) interface{} {
+			return work(msg.([]interface{}))
+		},
+	}
+	w.actors = append(w.actors, result)
+	return result
+}
+
+func (w *Window) Foreach(work func(msg []interface{})) *Sink {
+	result := &Sink{
+		work: func(msg interface{}) {
+			work(msg.([]interface{}))
+		},
+	}
+	w.actors = append(w.actors, result)
+	return result
+}
+
+func (w *Window) Filter(work func(msg []interface{}) bool) *Filter {
+	result := &Filter{
+		work: func(msg interface{}) bool {
+			return work(msg.([]interface{}))
+		},
+	}
+	w.actors = append(w.actors, result)
+	return result
+}
+
 func (w *Window) Receive(context akka.Context) {
 	switch msg := context.Message().(type) {
 	case *akka.Started:

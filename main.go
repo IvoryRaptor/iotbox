@@ -29,17 +29,16 @@ func main() {
 
 	source.
 		Window(5).
-		Map(func(msg interface{}) interface{} {
+		Map(func(msg []interface{}) interface{} {
 			sum := 0
-			for _, m := range msg.([]interface{}) {
+			for _, m := range msg {
 				sum += m.(common.Message)["a"].(int)
 			}
 			return common.Message{"sum": sum}
-		}).
-		Foreach(func(msg interface{}) {
-			m := msg.(common.Message)
-			println(m["sum"].(int))
-		})
+		}).Foreach(func(msg interface{}) {
+		m := msg.(common.Message)
+		println(m["sum"].(int))
+	})
 
 	source.Start()
 
