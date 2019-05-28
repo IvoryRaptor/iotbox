@@ -6,19 +6,19 @@ import (
 
 type Source struct {
 	self *akka.ActorRef
-	Flow
+	BaseFlow
 }
 
 func (s *Source) Receive(context akka.Context) {
 	switch msg := context.Message().(type) {
 	case *akka.Started:
-		s.start(context)
+		s.Start(context)
 	case interface{}:
-		s.tellNext(msg)
+		s.TellNext(msg)
 	}
 }
 
-func (s *Source) Start() {
+func (s *Source) Run() {
 	s.self = akka.EmptyRootContext.ActorOf(akka.PropsFromProducer(func() akka.Actor {
 		return s
 	}))

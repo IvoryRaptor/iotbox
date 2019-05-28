@@ -5,14 +5,14 @@ import (
 )
 
 type Sink struct {
-	Flow
+	BaseFlow
 	work func(msg interface{})
 }
 
 func (s *Sink) Receive(context akka.Context) {
 	switch msg := context.Message().(type) {
 	case *akka.Started:
-		s.start(context)
+		s.Start(context)
 	case interface{}:
 		s.work(msg)
 	}

@@ -5,14 +5,14 @@ import (
 )
 
 type Transform struct {
-	Flow
+	BaseFlow
 	work func(msg interface{}) interface{}
 }
 
 func (t *Transform) Receive(context akka.Context) {
 	switch msg := context.Message().(type) {
 	case *akka.Started:
-		t.start(context)
+		t.Start(context)
 	case interface{}:
 		res := t.work(msg)
 		for _, next := range t.refs {

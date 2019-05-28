@@ -1,0 +1,28 @@
+{
+  "anonymous": true,
+  "client": "uploader",
+  "clientid": "163faecca7b548d9abc48a9a2ccf5ab4",
+  "clientidname": "Libratone firmware production",
+  "clientidtype": "production",
+  "clientversion": "1352",
+  "connection": "wan",
+  "countrycode": "cn",
+  "custom": {
+    "aiservice": "tencent",
+    "result": "暂停"
+  },
+  "deviceid": "anon-39dc4733aba843faacc856a7db8c9133",
+  "devicemanufacturer": "Libratone",
+  "devicename": "ZippII",
+  "function": "stt",
+  "id": "b4776bf0ce364b2d9ebbca5d2a4fa7a8",
+  "localtime": "2019-03-20T00:49:11.000",
+  "oem": "libratone",
+  "platform": "Delta-N",
+  "platformversion": "1.2.380",
+  "receivedtime": "2019-03-20T00:49:21.967Z",
+  "schemaversion": "1.0",
+  "sequencenumber": 116,
+  "sessionid": "7df8357dada5ed4e954740fc89489bd8",
+  "type": "devicefunctionevent"
+}

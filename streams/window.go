@@ -5,7 +5,7 @@ import (
 )
 
 type Window struct {
-	Flow
+	BaseFlow
 	count  int
 	index  int
 	packet []interface{}
@@ -46,7 +46,7 @@ func (w *Window) Receive(context akka.Context) {
 	case *akka.Started:
 		w.index = 0
 		w.packet = make([]interface{}, w.count)
-		w.start(context)
+		w.Start(context)
 	case interface{}:
 		w.packet[w.index] = msg
 		w.index++
@@ -54,7 +54,7 @@ func (w *Window) Receive(context akka.Context) {
 			w.index = 0
 			packet := make([]interface{}, w.count)
 			copy(packet, w.packet)
-			w.tellNext(packet)
+			w.TellNext(packet)
 		}
 	}
 }
